@@ -18,7 +18,7 @@ void usart2_print(char* c) {
     }
 }
 
-void USART1_Init()
+void USART1_Init(unsigned int speed)
 {
     /* Enable GPIO clock */
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
@@ -49,7 +49,7 @@ void USART1_Init()
     NVIC_Init(&NVIC_InitStructure);
 
     // USART1
-    USART_InitStructure.USART_BaudRate = 9600;
+    USART_InitStructure.USART_BaudRate = speed;
     USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
     USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
     USART_InitStructure.USART_Parity = USART_Parity_No;

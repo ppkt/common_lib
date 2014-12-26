@@ -9,7 +9,7 @@
 
 void USART1_IRQHandler(void);
 
-void USART1_Init();
+void USART1_Init(unsigned int speed);
 void USART2_Init();
 
 void usart1_print(char* c);
