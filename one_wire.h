@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdio.h>
+#include "usart.h"
 
 typedef enum {
 	ONE_WIRE_SLAVE_PRESENT,

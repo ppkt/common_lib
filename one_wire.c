@@ -1,6 +1,6 @@
 #include "one_wire.h"
 
-static one_wire_device one_wire_devices[10];
+one_wire_device one_wire_devices[10];
 u8 one_wire_device_count = 0;
 
 GPIO_TypeDef *gpio;
@@ -356,5 +356,5 @@ one_wire_device* one_wire_search_rom(u8 *devices) {
 		result = one_wire_next();
 	}
 	*devices = one_wire_device_count;
-	return &one_wire_devices;
+	return one_wire_devices;
 }

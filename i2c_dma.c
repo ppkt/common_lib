@@ -50,6 +50,7 @@ Status I2C_Master_BufferRead(I2C_TypeDef* I2Cx, uint8_t* pBuffer,  uint32_t NumB
 
 {
     __IO uint32_t temp = 0;
+    (void)temp; // Ignore "temp unused" warning
     __IO uint32_t Timeout = 0;
 
     /* Enable I2C errors interrupts (used in all modes: Polling, DMA and Interrupts */
@@ -352,6 +353,7 @@ Status I2C_Master_BufferWrite(I2C_TypeDef* I2Cx, uint8_t* pBuffer,  uint32_t Num
 {
 
     __IO uint32_t temp = 0;
+    (void)temp; // Ignore "temp unused" warning
     __IO uint32_t Timeout = 0;
 
     /* Enable Error IT (used in all modes: DMA, Polling and Interrupts */
