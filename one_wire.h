@@ -26,4 +26,8 @@ bool one_wire_read_bit();
 void one_wire_write_byte(u8 data);
 u8 one_wire_read_byte();
 one_wire_device * one_wire_search_rom(u8 *devices);
+bool one_wire_match_rom(one_wire_device device);
+u8 one_wire_get_crc();
+u8 one_wire_crc(u8 data);
+void one_wire_reset_crc();
 #endif // __ONE_WIRE_H__

@@ -15,7 +15,7 @@ u8 last_device_flag;
 u8 crc8;
 u8 ROM_NO[8];
 
-static unsigned char crc_table[] = {
+const unsigned char crc_table[] = {
 	0, 94,188,226, 97, 63,221,131,194,156,126, 32,163,253, 31, 65,
 	157,195, 33,127,252,162, 64, 30, 95, 1,227,189, 62, 96,130,220,
 	35,125,159,193, 66, 28,254,160,225,191, 93, 3,128,222, 60, 98,
@@ -48,8 +48,12 @@ void one_wire_init(GPIO_TypeDef *g, u16 p, TIM_TypeDef *t) {
 	state = ONE_WIRE_ERROR;
 
 	/* Enable GPIO clock */
-	if (gpio == GPIOC)
-		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
+	if (gpio == GPIOA)
+        RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+	else if (gpio == GPIOB)
+        RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+	else if (gpio == GPIOC)
+        RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
 	else
 		while(1){} // not implemented
 
@@ -64,12 +68,14 @@ void one_wire_init(GPIO_TypeDef *g, u16 p, TIM_TypeDef *t) {
 	// Setup clock
 	if (timer == TIM2)
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+	else if (timer == TIM3)
+        RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
 	else
 		while(1){} // not implemented
 
 	TIM_TimeBaseInitTypeDef TIM_InitStructure;
 	TIM_InitStructure.TIM_CounterMode = TIM_CounterMode_Up;
-	TIM_InitStructure.TIM_Prescaler = 24 - 1;
+	TIM_InitStructure.TIM_Prescaler = 72 - 1;
 	TIM_InitStructure.TIM_Period = 10000 - 1; // Update event every 10000 us / 10 ms
 	TIM_InitStructure.TIM_ClockDivision = TIM_CKD_DIV1;
 	TIM_InitStructure.TIM_RepetitionCounter = 0;
@@ -328,25 +334,27 @@ int one_wire_next()
 
 one_wire_device* one_wire_search_rom(u8 *devices) {
 	int result, i;
-	int count = 0;
+//	int count = 0;
 	result = one_wire_first();
+	char buffer[10];
 	while (result)
 	{
 		one_wire_device device;
 		// print device found - CRC, ID, Family
 		for (i = 7; i >= 0; i--) {
-			printf("%02X", ROM_NO[i]);
+		    sprintf(buffer, "%02X", ROM_NO[i]);
+			usart2_print(buffer);
 		}
 
-		for (i = 0; i < 8; ++i) {
+		for (i = 7; i >= 0; i--) {
 			device.address[i] = ROM_NO[i];
 		}
 
 		one_wire_devices[one_wire_device_count++] = device;
 
-		printf(" %d\r\n", ++count);
+		usart2_print("\r\n");
 		result = one_wire_next();
 	}
 	*devices = one_wire_device_count;
-	return one_wire_devices;
+	return &one_wire_devices;
 }
