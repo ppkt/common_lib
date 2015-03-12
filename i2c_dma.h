@@ -104,7 +104,7 @@
 #define I2C_IT_ERR                      ((uint16_t)0x0100)
 
 
-#define  ClockSpeed            400000
+#define  ClockSpeed            100000
 
 #define I2C_DIRECTION_TX 0
 #define I2C_DIRECTION_RX 1
@@ -133,7 +133,7 @@ typedef enum
 {
     Error = 0,
     Success = !Error
-}Status;
+} Status;
 
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
