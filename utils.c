@@ -14,6 +14,12 @@ void delay_decrement(void)
   if (_delay--) {}
 }
 
+void delay_us(TIM_TypeDef *timer, unsigned int time) {
+	timer->CNT = 0;
+	time -= 3;
+	while (timer->CNT <= time) {}
+}
+
 // Init Discovery LEDs
 void LED_Init() {
 	/* Enable GPIO clock */
