@@ -334,7 +334,7 @@ int one_wire_next()
 
 one_wire_device* one_wire_search_rom(u8 *devices) {
 	int result, i;
-//	int count = 0;
+	one_wire_device_count = 0;
 	result = one_wire_first();
 	char buffer[10];
 	while (result)
