@@ -1,18 +1,5 @@
 #include "spi.h"
 
-#define BufferSize       32
-u8 tmp[2] = {0x00, 0x00};
-uint8_t SPI1_Buffer_Tx[BufferSize] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-                                      0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E,
-                                      0x0F, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15,
-                                      0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C,
-                                      0x1D, 0x1E, 0x1F, 0x20};
-uint8_t SPI1_Buffer_Rx[BufferSize] = {0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57,
-                                      0x58, 0x59, 0x5A, 0x5B, 0x5C, 0x5D, 0x5E,
-                                      0x5F, 0x60, 0x61, 0x62, 0x63, 0x64, 0x65,
-                                      0x66, 0x67, 0x68, 0x69, 0x6A, 0x6B, 0x6C,
-                                      0x6D, 0x6E, 0x6F, 0x70};
-
 void rcc_configuration() {
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_SPI1, ENABLE);
 }
@@ -30,14 +17,10 @@ void gpio_configuration() {
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
-    GPIO_WriteBit(GPIOA, GPIO_Pin_2, Bit_SET);
-    GPIO_WriteBit(GPIOA, GPIO_Pin_3, Bit_SET);
     GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
-
-
 }
 
 void spi_init(void) {
