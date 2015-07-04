@@ -6,9 +6,10 @@
 #include <stm32f10x_tim.h>
 
 #ifdef STM32F10X_MD
-#define U_ID_0 (*(uint32_t*)0x1FFFF7E8)
-#define U_ID_1 (*(uint32_t*)0x1FFFF7EC)
-#define U_ID_2 (*(uint32_t*)0x1FFFF7F0)
+#define U_ID_PTR            (0x1FFFF7E8)
+#define U_ID_0 (*(uint32_t*)(U_ID_PTR))
+#define U_ID_1 (*(uint32_t*)(U_ID_PTR + 4))
+#define U_ID_2 (*(uint32_t*)(U_ID_PTR + 8))
 #else
 #define U_ID_0 0xFFFFFFFF
 #define U_ID_1 0xFFFFFFFF
