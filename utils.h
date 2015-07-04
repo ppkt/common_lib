@@ -16,9 +16,14 @@
 #define U_ID_2 0xFFFFFFFF
 #endif
 
+void setup_delay_timer(TIM_TypeDef *timer);
 void delay(__IO uint32_t nTime /*ms*/);
 void delay_decrement(void);
 void delay_us(TIM_TypeDef *timer, unsigned int time);
-void LED_Init();
-void BTN_Init();
+void LED_Init(void);
+void BTN_Init(void);
+
+void LED_Init1(void);
+void LED_Init2(void);
+void LED_Init3(void);
 #endif
