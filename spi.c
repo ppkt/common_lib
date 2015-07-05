@@ -23,7 +23,7 @@ void gpio_configuration() {
     GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
 }
 
-void spi_init(void) {
+void spi_init(SPI_TypeDef *spi) {
     /* System clocks configuration ---------------------------------------------*/
     rcc_configuration();
 
@@ -31,7 +31,7 @@ void spi_init(void) {
     gpio_configuration();
 
     /* SPI1 Config -------------------------------------------------------------*/
-    SPI_I2S_DeInit(SPI1);
+    SPI_I2S_DeInit(spi);
     SPI_InitTypeDef   SPI_InitStructure;
     SPI_InitStructure.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
     SPI_InitStructure.SPI_Mode = SPI_Mode_Master;
@@ -42,20 +42,21 @@ void spi_init(void) {
     SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_256;
     SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
     SPI_InitStructure.SPI_CRCPolynomial = 7;
-    SPI_Init(SPI1, &SPI_InitStructure);
+    SPI_Init(spi, &SPI_InitStructure);
 
-    /* Enable SPIy */
-    SPI_Cmd(SPI1, ENABLE);
+    /* Enable SPI1 */
+    SPI_Cmd(spi, ENABLE);
 }
 
-void spi_send(u8* tx, u8* rx, u8 size) {
+void spi_send(SPI_TypeDef *spi, u8* tx, u8* rx, u8 size) {
     u8 index;
     GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
     for (index = 0; index < size; ++index) {
-        while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_TXE) == RESET);
-        SPI_I2S_SendData(SPI1, tx[index]);
-        while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET);
-        rx[index] = SPI_I2S_ReceiveData(SPI1);
+        while (SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_TXE) == RESET);
+        SPI_I2S_SendData(spi, tx[index]);
+
+        while (SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_RXNE) == RESET);
+        rx[index] = SPI_I2S_ReceiveData(spi);
     }
     GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
 }
