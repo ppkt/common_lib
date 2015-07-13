@@ -16,11 +16,6 @@ void gpio_configuration() {
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
-    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
 }
 
 void spi_init(SPI_TypeDef *spi) {
@@ -50,7 +45,6 @@ void spi_init(SPI_TypeDef *spi) {
 
 void spi_send(SPI_TypeDef *spi, u8* tx, u8* rx, u8 size) {
     u8 index;
-    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
     for (index = 0; index < size; ++index) {
         while (SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_TXE) == RESET);
         SPI_I2S_SendData(spi, tx[index]);
@@ -58,5 +52,6 @@ void spi_send(SPI_TypeDef *spi, u8* tx, u8* rx, u8 size) {
         while (SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_RXNE) == RESET);
         rx[index] = SPI_I2S_ReceiveData(spi);
     }
-    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
+    // Wait for end of transmission
+    while (SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_TXE) == RESET);
 }
