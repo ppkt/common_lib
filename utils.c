@@ -43,6 +43,12 @@ void delay_us(TIM_TypeDef *timer, unsigned int time) {
     while (timer->CNT <= time) {}
 }
 
+void delay_ms(TIM_TypeDef *timer, unsigned int time) {
+    while (time--) {
+        delay_us(timer, 1000);
+    }
+}
+
 void LED_Init1(void) {
     //Smaller board
 
