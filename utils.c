@@ -3,11 +3,14 @@
 static __IO uint32_t _delay;
 
 void setup_delay_timer(TIM_TypeDef *timer) {
+    TIM_DeInit(timer);
     // Enable Timer clock
     if (timer == TIM2) {
         RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
     } else if (timer == TIM3) {
         RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
+    } else if (timer == TIM4) {
+        RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
     } else {
         // TODO: not implemented
         while(1){}
@@ -77,6 +80,8 @@ void LED_Init2(void) {
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+    GPIO_WriteBit(GPIOA, GPIO_Pin_1, Bit_RESET);
 }
 
 void LED_Init3(void) {
