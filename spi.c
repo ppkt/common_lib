@@ -4,7 +4,7 @@ void rcc_configuration() {
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_SPI1, ENABLE);
 }
 
-void gpio_configuration() {
+void spi_gpio_configuration() {
     GPIO_InitTypeDef GPIO_InitStructure;
 
     // Configure SPI1 pins: SCK, MISO and MOSI
@@ -23,7 +23,7 @@ void spi_init(SPI_TypeDef *spi) {
     rcc_configuration();
 
     /* GPIO configuration ------------------------------------------------------*/
-    gpio_configuration();
+    spi_gpio_configuration();
 
     /* SPI1 Config -------------------------------------------------------------*/
     SPI_I2S_DeInit(spi);
