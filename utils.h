@@ -27,4 +27,6 @@ void BTN_Init(void);
 void LED_Init1(void);
 void LED_Init2(void);
 void LED_Init3(void);
+
+void LED_toggle(uint8_t id);
 #endif

@@ -52,6 +52,22 @@ void delay_ms(TIM_TypeDef *timer, unsigned int time) {
     }
 }
 
+void LED_toggle(uint8_t id) {
+    GPIO_TypeDef* gpio;
+    uint16_t pin;
+
+    if (id == 1) {
+        // Smaller board
+        gpio = GPIOC;
+        pin = GPIO_Pin_13;
+    }
+
+    // Toggles LED state on dev board
+    BitAction b = GPIO_ReadOutputDataBit(gpio, pin);
+    GPIO_WriteBit(gpio, pin, !b);
+}
+
+
 void LED_Init1(void) {
     //Smaller board
 
