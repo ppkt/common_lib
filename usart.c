@@ -87,6 +87,15 @@ void USART2_Init(unsigned int speed)
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
 
+    // NVIC
+    NVIC_InitTypeDef NVIC_InitStructure; // Configure the NVIC (nested vector interrupt controller)
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_0);
+    NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;   // we want to configure the USART1 interrupts
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;     // this sets the priority group of the USART1 interrupts
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;        // this sets the subpriority inside the group
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;       // the USART1 interrupts are globally enabled
+    NVIC_Init(&NVIC_InitStructure);
+
     // USART2
     USART_InitStructure.USART_BaudRate = speed;
     USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
@@ -96,6 +105,9 @@ void USART2_Init(unsigned int speed)
     USART_InitStructure.USART_WordLength = USART_WordLength_8b;
 
     USART_Init(USART2, &USART_InitStructure);
+
+    // Enable interrupts
+    USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
 
     // Enable usart
     USART_Cmd(USART2, ENABLE);
