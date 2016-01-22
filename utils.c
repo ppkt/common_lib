@@ -2,6 +2,64 @@
 
 static __IO uint32_t _delay;
 
+void rtc_setup(void) {
+    // Based on http://www.stm32.eu/node/97 and AN2821
+
+    // Enable PWR and BKP clocks
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
+    // Enable access to BKP
+    PWR_BackupAccessCmd(ENABLE);
+    // BKP de-init
+    BKP_DeInit();
+    // Start editing RTC configuration
+    RTC_EnterConfigMode();
+    // Enable LSE
+    RCC_LSEConfig(RCC_LSE_ON);  // RCC_LSICmd(ENABLE);
+    // Wait for LSE
+    while(RCC_GetFlagStatus(RCC_FLAG_LSERDY) == RESET) {}  // while(RCC_GetFlagStatus(RCC_FLAG_LSIRDY) == RESET) {}
+    // RTCCLK = LSE = 32.768 kHz
+    RCC_RTCCLKConfig(RCC_RTCCLKSource_LSE);  // RCC_RTCCLKConfig(RCC_RTCCLKSource_LSI);
+    // Turn on RTC clock
+    RCC_RTCCLKCmd(ENABLE);
+    // Wait for synchronization
+    RTC_WaitForSynchro();
+    // Wait until operation finish
+    RTC_WaitForLastTask();
+    // Enable RTC second
+    RTC_ITConfig(RTC_IT_SEC, ENABLE);
+    RTC_WaitForLastTask();
+    // Set Prescaler to 32768 ticks
+    // RTC period = RTCCLK/RTC_PR = (32.768 KHz)/(32767+1)
+    RTC_SetPrescaler(32767);
+    RTC_WaitForLastTask();
+    // Exit configuration editing mode
+    RTC_ExitConfigMode();
+    // Set RTC counter (time) to 12:00:00
+    RTC_SetCounter(12 * 60 * 60);
+
+    // Disable default Tamper Pin
+    BKP_TamperPinCmd(DISABLE);
+
+    // Enable calibration data on Tamper Pin
+//    BKP_RTCOutputConfig(BKP_RTCOutputSource_CalibClock);
+
+    // Enable seconds indicator on Tamper Pin
+    BKP_RTCOutputConfig(BKP_RTCOutputSource_Second);
+
+    // Enable RTC interrupts
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
+    NVIC_InitTypeDef NVIC_InitStructure;
+    NVIC_InitStructure.NVIC_IRQChannel = RTC_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
+
+    // Interrupt every 1 second
+    RTC_ITConfig(RTC_IT_SEC, ENABLE);
+    RTC_WaitForLastTask();
+}
+
 void setup_delay_timer(TIM_TypeDef *timer) {
     TIM_DeInit(timer);
     // Enable Timer clock
@@ -60,6 +118,9 @@ void LED_toggle(uint8_t id) {
         // Smaller board
         gpio = GPIOC;
         pin = GPIO_Pin_13;
+    } else if (id == 2) {
+        gpio = GPIOA;
+        pin = GPIO_Pin_1;
     }
 
     // Toggles LED state on dev board
