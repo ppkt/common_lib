@@ -1,8 +1,11 @@
 #ifndef __UTILS_H__
 #define __UTILS_H__
 #include <stm32f10x.h>
+#include <stm32f10x_bkp.h>
 #include <stm32f10x_gpio.h>
+#include <stm32f10x_pwr.h>
 #include <stm32f10x_rcc.h>
+#include <stm32f10x_rtc.h>
 #include <stm32f10x_tim.h>
 
 #ifdef STM32F10X_MD
@@ -16,6 +19,7 @@
 #define U_ID_2 0xFFFFFFFF
 #endif
 
+void rtc_setup(void);
 void setup_delay_timer(TIM_TypeDef *timer);
 void delay(__IO uint32_t nTime /*ms*/);
 void delay_decrement(void);
