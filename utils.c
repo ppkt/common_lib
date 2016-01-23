@@ -142,6 +142,8 @@ void LED_Init1(void) {
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
+
+    GPIO_WriteBit(GPIOC, GPIO_Pin_13, Bit_SET);
 }
 
 void LED_Init2(void) {
@@ -190,3 +192,9 @@ void BTN_Init(void) {
     GPIO_Init(GPIOA, &GPIO_InitStructure);
 }
 
+void hacf(void) {
+    while (1) {
+        LED_toggle(1);
+        delay_ms(TIM2, 500);
+    }
+}

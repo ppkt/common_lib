@@ -19,6 +19,7 @@
 #define U_ID_2 0xFFFFFFFF
 #endif
 
+void hacf(void);
 void rtc_setup(void);
 void setup_delay_timer(TIM_TypeDef *timer);
 void delay(__IO uint32_t nTime /*ms*/);
