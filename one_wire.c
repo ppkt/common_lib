@@ -342,8 +342,8 @@ one_wire_device* one_wire_search_rom(u8 *devices) {
 		one_wire_device device;
 		// print device found - CRC, ID, Family
 		for (i = 7; i >= 0; i--) {
-		    sprintf(buffer, "%02X", ROM_NO[i]);
-			usart2_print(buffer);
+//			sprintf(buffer, "%02X", ROM_NO[i]);
+//			usart2_print(buffer);
 		}
 
 		for (i = 7; i >= 0; i--) {
@@ -352,7 +352,7 @@ one_wire_device* one_wire_search_rom(u8 *devices) {
 
 		one_wire_devices[one_wire_device_count++] = device;
 
-		usart2_print("\r\n");
+//		usart2_print("\r\n");
 		result = one_wire_next();
 	}
 	*devices = one_wire_device_count;
