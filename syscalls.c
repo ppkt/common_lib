@@ -19,7 +19,7 @@
 #undef errno
 extern int errno;
 
-register char * stack_ptr asm("sp");
+register char * stack_ptr __asm__("sp");
 
 char *__env[1] = { 0 };
 char **environ = __env;
@@ -60,7 +60,7 @@ int _write(int file, char *ptr, int len)
 
 caddr_t _sbrk(int incr)
 {
-	extern char end asm("end");
+	extern char end __asm__("end");
 	static char *heap_end;
 	char *prev_heap_end;
 
