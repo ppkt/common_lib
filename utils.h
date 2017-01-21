@@ -35,6 +35,10 @@ void LED_Init3(void);
 
 void LED_toggle(uint8_t id);
 
+uint8_t sadd8(uint8_t a, uint8_t b);
+uint16_t sadd16(uint16_t a, uint16_t b);
+uint32_t sadd32(uint32_t a, uint32_t b);
+
 #define max(a, b) \
   ({ __typeof__ (a) _a = (a); \
       __typeof__ (b) _b = (b); \

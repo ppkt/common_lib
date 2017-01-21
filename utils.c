@@ -201,3 +201,13 @@ void hacf(void) {
         delay_ms(TIM2, 500);
     }
 }
+
+// Saturated add functions for 8 / 16 / 32 unsigned integers
+inline uint8_t sadd8(uint8_t a, uint8_t b)
+    { return (a > 0xFF - b) ? 0xFF : a + b; }
+
+inline uint16_t sadd16(uint16_t a, uint16_t b)
+    { return (a > 0xFFFF - b) ? 0xFFFF : a + b; }
+
+inline uint32_t sadd32(uint32_t a, uint32_t b)
+    { return (a > 0xFFFFFFFF - b) ? 0xFFFFFFFF : a + b;}
