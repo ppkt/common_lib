@@ -34,4 +34,14 @@ void LED_Init2(void);
 void LED_Init3(void);
 
 void LED_toggle(uint8_t id);
+
+#define max(a, b) \
+  ({ __typeof__ (a) _a = (a); \
+      __typeof__ (b) _b = (b); \
+    _a > _b ? _a : _b; })
+
+#define min(a, b) \
+  ({ __typeof__ (a) _a = (a); \
+      __typeof__ (b) _b = (b); \
+    _a < _b ? _a : _b; })
 #endif

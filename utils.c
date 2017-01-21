@@ -121,6 +121,9 @@ void LED_toggle(uint8_t id) {
     } else if (id == 2) {
         gpio = GPIOA;
         pin = GPIO_Pin_1;
+    } else {
+        // Not implemented
+        hacf();
     }
 
     // Toggles LED state on dev board
