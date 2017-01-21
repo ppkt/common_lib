@@ -7,14 +7,16 @@ volatile unsigned int received_count = 0; // count of charrs
 void usart1_print(char* c) {
     u8 a = 0;
     while (c[a]) {
-        PrintChar(c[a++]);
+        USART_SendData(USART1, (u8)c[a++]);
+        while (USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET);
     }
 }
 
 void usart2_print(char* c) {
     u8 a = 0;
     while (c[a]) {
-        PrintCharPc(c[a++]);
+        USART_SendData(USART2, (u8)c[a++]);
+        while (USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
     }
 }
 
@@ -127,4 +129,24 @@ volatile char* usart_get_string() {
 }
 volatile u8 usart_get_string_length() {
     return received_count;
+}
+
+void usart_print(USART_TypeDef* usart, char* string)
+{
+    u8 a = 0;
+    while (string[a]) {
+        USART_SendData(usart, string[a++]);
+        while (USART_GetFlagStatus(usart, USART_FLAG_TXE) == RESET);
+    }
+}
+
+void usart_printf(USART_TypeDef *usart, const char *format, ...)
+{
+    va_list args;
+    static char buffer[80];
+
+    va_start(args, format);
+    vsnprintf(buffer, sizeof(buffer), format, args);
+    va_end(args);
+    usart_print(usart, buffer);
 }
