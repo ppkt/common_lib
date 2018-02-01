@@ -498,6 +498,131 @@ Status I2C_Master_BufferWrite(I2C_TypeDef* I2Cx, uint8_t* pBuffer,  uint32_t Num
 }
 
 
+Status i2c_master_transaction_write_read(
+        I2C_TypeDef* I2Cx,
+        uint8_t* tx_buffer,  uint32_t bytes_to_write,
+        uint8_t* rx_buffer,  uint32_t bytes_to_read,
+        I2C_ProgrammingModel mode, uint8_t slave_address)
+{
+
+    __IO uint32_t temp = 0;
+    (void)temp; // Ignore "temp unused" warning
+    __IO uint32_t timeout = 0;
+    if (mode == DMA) {
+
+        // -------------------------- READ -----------------------------------//
+        timeout = 0xFFFF;
+        /* Configure the DMA channel for I2Cx transmission */
+        I2C_DMAConfig (I2Cx, tx_buffer, bytes_to_write, I2C_DIRECTION_TX);
+        /* Enable the I2Cx DMA requests */
+        I2Cx->CR2 |= CR2_DMAEN_Set;
+        /* Send START condition */
+        I2Cx->CR1 |= CR1_START_Set;
+        /* Wait until SB flag is set: EV5 */
+        while ((I2Cx->SR1 & 0x0001) != 0x0001) {
+            if (timeout-- == 0) {
+                return Error;
+            }
+        }
+        timeout = 0xFFFF;
+
+        /* Send the slave address */
+        /* Reset the address bit0 for write */
+        I2Cx->DR = (slave_address << 1) & OAR1_ADD0_Reset;
+        /* Wait until ADDR is set: EV6 */
+        while ((I2Cx->SR1&0x0002) != 0x0002) {
+            if (timeout-- == 0) {
+                return Error;
+            }
+        }
+
+        /* Clear ADDR flag by reading SR2 register */
+        temp = I2Cx->SR2;
+        if (I2Cx == I2C1)
+        {
+            /* Wait until DMA end of transfer */
+            while (!DMA_GetFlagStatus(DMA1_FLAG_TC6));
+            /* Disable the DMA1 Channel 6 */
+            DMA_Cmd(I2C1_DMA_CHANNEL_TX, DISABLE);
+            /* Clear the DMA Transfer complete flag */
+            DMA_ClearFlag(DMA1_FLAG_TC6);
+        }
+        else  /* I2Cx = I2C2 */
+        {
+            /* Wait until DMA end of transfer */
+            while (!DMA_GetFlagStatus(DMA1_FLAG_TC4));
+            /* Disable the DMA1 Channel 4 */
+            DMA_Cmd(I2C2_DMA_CHANNEL_TX, DISABLE);
+            /* Clear the DMA Transfer complete flag */
+            DMA_ClearFlag(DMA1_FLAG_TC4);
+        }
+
+        /* EV8_2: Wait until BTF is set before programming the STOP */
+        while ((I2Cx->SR1 & 0x00004) != 0x000004);
+
+//        /* Program the STOP */
+//        I2Cx->CR1 |= CR1_STOP_Set;
+//        /* Make sure that the STOP bit is cleared by Hardware */
+//        while ((I2Cx->CR1&0x200) == 0x200);
+
+        // ----------------------- WRITE -------------------------------------//
+        /* Configure I2Cx DMA channel */
+        I2C_DMAConfig(I2Cx, rx_buffer, bytes_to_read, I2C_DIRECTION_RX);
+        /* Set Last bit to have a NACK on the last received byte */
+        I2Cx->CR2 |= CR2_LAST_Set;
+        /* Enable I2C DMA requests */
+        I2Cx->CR2 |= CR2_DMAEN_Set;
+        timeout = 0xFFFF;
+        /* Send START condition */
+        I2Cx->CR1 |= CR1_START_Set;
+        /* Wait until SB flag is set: EV5  */
+        while ((I2Cx->SR1&0x0001) != 0x0001)
+        {
+            if (timeout-- == 0)
+                return Error;
+        }
+        timeout = 0xFFFF;
+        /* Send the slave address */
+        /* Set the address bit0 for read */
+        I2Cx->DR = (slave_address << 1) | OAR1_ADD0_Set;
+        /* Wait until ADDR is set: EV6 */
+        while ((I2Cx->SR1&0x0002) != 0x0002)
+        {
+            if (timeout-- == 0)
+                return Error;
+        }
+        /* Clear ADDR flag by reading SR2 register */
+        temp = I2Cx->SR2;
+        if (I2Cx == I2C1)
+        {
+            /* Wait until DMA end of transfer */
+            while (!DMA_GetFlagStatus(DMA1_FLAG_TC7));
+            /* Disable DMA Channel */
+            DMA_Cmd(I2C1_DMA_CHANNEL_RX, DISABLE);
+            /* Clear the DMA Transfer Complete flag */
+            DMA_ClearFlag(DMA1_FLAG_TC7);
+
+        }
+
+        else /* I2Cx = I2C2*/
+        {
+            /* Wait until DMA end of transfer */
+            while (!DMA_GetFlagStatus(DMA1_FLAG_TC5));
+            /* Disable DMA Channel */
+            DMA_Cmd(I2C2_DMA_CHANNEL_RX, DISABLE);
+            /* Clear the DMA Transfer Complete flag */
+            DMA_ClearFlag(DMA1_FLAG_TC5);
+        }
+        /* Program the STOP */
+        I2Cx->CR1 |= CR1_STOP_Set;
+        /* Make sure that the STOP bit is cleared by Hardware before CR1 write access */
+        while ((I2Cx->CR1&0x200) == 0x200);
+
+    }
+    return Success;
+}
+
+
 /**
   * @brief Prepares the I2Cx slave for transmission.
   * @param I2Cx: I2C1 or I2C2.
@@ -698,7 +823,13 @@ void I2C_DMAConfig(I2C_TypeDef* I2Cx, uint8_t* pBuffer, uint32_t BufferSize, uin
 
 
 
+Status i2c_master_buffer_write_byte(I2C_TypeDef* i2c, uint8_t reg, uint8_t value, uint8_t address) {
+    uint8_t tx[2];
+    tx[0] = reg;
+    tx[1] = value;
 
+    return I2C_Master_BufferWrite(i2c, tx, 2, DMA, address << 1);
+}
 
 /**
   * @}
