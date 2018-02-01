@@ -198,7 +198,7 @@ void BTN_Init(void) {
 void hacf(void) {
     while (1) {
         LED_toggle(1);
-        delay_ms(TIM2, 500);
+        delay_ms(TIM2, 50);
     }
 }
 
