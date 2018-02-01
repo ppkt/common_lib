@@ -210,4 +210,9 @@ inline uint16_t sadd16(uint16_t a, uint16_t b)
     { return (a > 0xFFFF - b) ? 0xFFFF : a + b; }
 
 inline uint32_t sadd32(uint32_t a, uint32_t b)
-    { return (a > 0xFFFFFFFF - b) ? 0xFFFFFFFF : a + b;}
+{ return (a > 0xFFFFFFFF - b) ? 0xFFFFFFFF : a + b;}
+
+inline uint8_t check_bit(uint32_t variable, uint8_t pos)
+{
+    return (variable >> pos) & 1;
+}

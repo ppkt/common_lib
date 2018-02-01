@@ -39,6 +39,9 @@ uint8_t sadd8(uint8_t a, uint8_t b);
 uint16_t sadd16(uint16_t a, uint16_t b);
 uint32_t sadd32(uint32_t a, uint32_t b);
 
+uint8_t check_bit(uint32_t variable, uint8_t pos);
+
+#define UNUSED(expr) (void)(expr)
 #define max(a, b) \
   ({ __typeof__ (a) _a = (a); \
       __typeof__ (b) _b = (b); \
