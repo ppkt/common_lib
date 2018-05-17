@@ -1,5 +1,4 @@
-#ifndef __UTILS_H__
-#define __UTILS_H__
+#pragma once
 #include <stm32f10x.h>
 #include <stm32f10x_bkp.h>
 #include <stm32f10x_gpio.h>
@@ -19,6 +18,10 @@
 #define U_ID_2 0xFFFFFFFF
 #endif
 
+#ifndef LED_INDICATOR
+#define LED_INDICATOR 1
+#endif
+
 void hacf(void);
 void rtc_setup(void);
 void setup_delay_timer(TIM_TypeDef *timer);
@@ -26,14 +29,8 @@ void delay(__IO uint32_t nTime /*ms*/);
 void delay_decrement(void);
 void delay_us(TIM_TypeDef *timer, unsigned int time);
 void delay_ms(TIM_TypeDef *timer, unsigned int time);
-void LED_Init(void);
-void BTN_Init(void);
-
-void LED_Init1(void);
-void LED_Init2(void);
-void LED_Init3(void);
-
-void LED_toggle(uint8_t id);
+void led_init(void);
+void led_toggle();
 
 uint8_t sadd8(uint8_t a, uint8_t b);
 uint16_t sadd16(uint16_t a, uint16_t b);
@@ -41,7 +38,6 @@ uint32_t sadd32(uint32_t a, uint32_t b);
 
 uint8_t check_bit(uint32_t variable, uint8_t pos);
 
-#define UNUSED(expr) (void)(expr)
 #define max(a, b) \
   ({ __typeof__ (a) _a = (a); \
       __typeof__ (b) _b = (b); \
@@ -51,4 +47,3 @@ uint8_t check_bit(uint32_t variable, uint8_t pos);
   ({ __typeof__ (a) _a = (a); \
       __typeof__ (b) _b = (b); \
     _a < _b ? _a : _b; })
-#endif

@@ -16,7 +16,7 @@ void rtc_setup(void) {
     // Enable LSE
     RCC_LSEConfig(RCC_LSE_ON);  // RCC_LSICmd(ENABLE);
     // Wait for LSE
-    while(RCC_GetFlagStatus(RCC_FLAG_LSERDY) == RESET) {}  // while(RCC_GetFlagStatus(RCC_FLAG_LSIRDY) == RESET) {}
+    while (RCC_GetFlagStatus(RCC_FLAG_LSERDY) == RESET) {}  // while(RCC_GetFlagStatus(RCC_FLAG_LSIRDY) == RESET) {}
     // RTCCLK = LSE = 32.768 kHz
     RCC_RTCCLKConfig(RCC_RTCCLKSource_LSE);  // RCC_RTCCLKConfig(RCC_RTCCLKSource_LSI);
     // Turn on RTC clock
@@ -71,7 +71,7 @@ void setup_delay_timer(TIM_TypeDef *timer) {
         RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
     } else {
         // TODO: not implemented
-        while(1){}
+        while (1) {}
     }
 
     // Configure timer
@@ -86,16 +86,14 @@ void setup_delay_timer(TIM_TypeDef *timer) {
     TIM_Cmd(timer, ENABLE);
 }
 
-void delay(__IO uint32_t nTime)
-{
-  _delay = nTime;
+void delay(__IO uint32_t nTime) {
+    _delay = nTime;
 
-  while(_delay != 0);
+    while (_delay != 0);
 }
 
-void delay_decrement(void)
-{
-  if (_delay--) {}
+void delay_decrement(void) {
+    if (_delay--) {}
 }
 
 void delay_us(TIM_TypeDef *timer, unsigned int time) {
@@ -110,20 +108,75 @@ void delay_ms(TIM_TypeDef *timer, unsigned int time) {
     }
 }
 
-void LED_toggle(uint8_t id) {
-    GPIO_TypeDef* gpio;
+void led_init(void) {
+    uint32_t rcc_clock;
+    uint16_t pin;
+    GPIO_TypeDef *gpio;
+    GPIO_InitTypeDef GPIO_InitStructure;
+
+    switch (LED_INDICATOR) {
+        case 1:
+            // PC13
+            rcc_clock = RCC_APB2Periph_GPIOC;
+            pin = GPIO_Pin_13;
+            gpio = GPIOC;
+            break;
+        case 2:
+            // PA1
+            rcc_clock = RCC_APB2Periph_GPIOA;
+            pin = GPIO_Pin_1;
+            gpio = GPIOA;
+            break;
+        case 3:
+            // PA8 PA9;
+            rcc_clock = RCC_APB2Periph_GPIOC;
+            pin = GPIO_Pin_8 | GPIO_Pin_9;
+            gpio = GPIOA;
+            break;
+        case 4:
+            // PB12
+            rcc_clock = RCC_APB2Periph_GPIOB;
+            pin = GPIO_Pin_12;
+            gpio = GPIOB;
+            break;
+        default:
+            hacf();
+            break;
+    }
+
+    /* Enable GPIO clock */
+    RCC_APB2PeriphClockCmd(rcc_clock, ENABLE);
+
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Pin = pin;
+    GPIO_Init(gpio, &GPIO_InitStructure);
+    GPIO_WriteBit(gpio, pin, Bit_SET);
+}
+
+void led_toggle() {
+    GPIO_TypeDef *gpio;
     uint16_t pin;
 
-    if (id == 1) {
-        // Smaller board
-        gpio = GPIOC;
-        pin = GPIO_Pin_13;
-    } else if (id == 2) {
-        gpio = GPIOA;
-        pin = GPIO_Pin_1;
-    } else {
-        // Not implemented
-        hacf();
+    switch (LED_INDICATOR) {
+        case 1:
+            gpio = GPIOC;
+            pin = GPIO_Pin_13;
+            break;
+        case 2:
+            gpio = GPIOA;
+            pin = GPIO_Pin_1;
+            break;
+        case 3:
+            gpio = GPIOB;
+            pin = GPIO_Pin_12;
+            break;
+        case 4:
+            gpio = GPIOA;
+            pin = GPIO_Pin_1;
+            break;
+        default:
+            hacf();
     }
 
     // Toggles LED state on dev board
@@ -131,88 +184,28 @@ void LED_toggle(uint8_t id) {
     GPIO_WriteBit(gpio, pin, !b);
 }
 
-
-void LED_Init1(void) {
-    //Smaller board
-
-    /* Enable GPIO clock */
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
-
-    // Use PC8 and PC9 // Discovery LEDs
-    GPIO_InitTypeDef GPIO_InitStructure;
-
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;
-    GPIO_Init(GPIOC, &GPIO_InitStructure);
-
-    GPIO_WriteBit(GPIOC, GPIO_Pin_13, Bit_SET);
-}
-
-void LED_Init2(void) {
-    //Bigger board
-
-    /* Enable GPIO clock */
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-
-    // Use PC8 and PC9 // Discovery LEDs
-    GPIO_InitTypeDef GPIO_InitStructure;
-
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-    GPIO_WriteBit(GPIOA, GPIO_Pin_1, Bit_RESET);
-}
-
-void LED_Init3(void) {
-    //Discovery board
-
-    /* Enable GPIO clock */
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
-
-    // Use PC8 and PC9 // Discovery LEDs
-    GPIO_InitTypeDef GPIO_InitStructure;
-
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9 | GPIO_Pin_8;
-    GPIO_Init(GPIOC, &GPIO_InitStructure);
-}
-
-// Initialize Discovery User Button
-void BTN_Init(void) {
-    /* Enable GPIO clock */
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-
-    // Use PC8 and PC9 // Discovery LEDs
-    GPIO_InitTypeDef GPIO_InitStructure;
-
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
-}
-
 void hacf(void) {
     while (1) {
-        LED_toggle(1);
-        delay_ms(TIM2, 50);
+        led_toggle();
+        delay_ms(TIM2, 30);
+        led_toggle();
+        delay_ms(TIM2, 300);
     }
 }
 
 // Saturated add functions for 8 / 16 / 32 unsigned integers
-inline uint8_t sadd8(uint8_t a, uint8_t b)
-    { return (a > 0xFF - b) ? 0xFF : a + b; }
+inline uint8_t sadd8(uint8_t a, uint8_t b) {
+    return (a > 0xFF - b) ? 0xFF : a + b;
+}
 
-inline uint16_t sadd16(uint16_t a, uint16_t b)
-    { return (a > 0xFFFF - b) ? 0xFFFF : a + b; }
+inline uint16_t sadd16(uint16_t a, uint16_t b) {
+    return (a > 0xFFFF - b) ? 0xFFFF : a + b;
+}
 
-inline uint32_t sadd32(uint32_t a, uint32_t b)
-{ return (a > 0xFFFFFFFF - b) ? 0xFFFFFFFF : a + b;}
+inline uint32_t sadd32(uint32_t a, uint32_t b) {
+    return (a > 0xFFFFFFFF - b) ? 0xFFFFFFFF : a + b;
+}
 
-inline uint8_t check_bit(uint32_t variable, uint8_t pos)
-{
+inline uint8_t check_bit(uint32_t variable, uint8_t pos) {
     return (variable >> pos) & 1;
 }
