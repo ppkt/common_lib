@@ -1,6 +1,6 @@
 #include "usart.h"
 
-void USART1_Init(unsigned int speed)
+void usart1_init(unsigned int speed)
 {
     /* Enable GPIO clock */
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
@@ -48,7 +48,7 @@ void USART1_Init(unsigned int speed)
 
 }
 
-void USART2_Init(unsigned int speed)
+void usart2_init(unsigned int speed)
 {
     /* Enable GPIO clock */
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
