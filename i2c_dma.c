@@ -508,9 +508,10 @@ Status i2c_master_transaction_write_read(
     __IO uint32_t temp = 0;
     (void)temp; // Ignore "temp unused" warning
     __IO uint32_t timeout = 0;
+    I2Cx->CR2 |= I2C_IT_ERR;
     if (mode == DMA) {
 
-        // -------------------------- READ -----------------------------------//
+        // -------------------------- WRITE ----------------------------------//
         timeout = 0xFFFF;
         /* Configure the DMA channel for I2Cx transmission */
         I2C_DMAConfig (I2Cx, tx_buffer, bytes_to_write, I2C_DIRECTION_TX);
@@ -565,7 +566,7 @@ Status i2c_master_transaction_write_read(
 //        /* Make sure that the STOP bit is cleared by Hardware */
 //        while ((I2Cx->CR1&0x200) == 0x200);
 
-        // ----------------------- WRITE -------------------------------------//
+        // ----------------------- READ --------------------------------------//
         /* Configure I2Cx DMA channel */
         I2C_DMAConfig(I2Cx, rx_buffer, bytes_to_read, I2C_DIRECTION_RX);
         /* Set Last bit to have a NACK on the last received byte */
@@ -582,6 +583,7 @@ Status i2c_master_transaction_write_read(
                 return Error;
         }
         timeout = 0xFFFF;
+
         /* Send the slave address */
         /* Set the address bit0 for read */
         I2Cx->DR = (slave_address << 1) | OAR1_ADD0_Set;
@@ -591,6 +593,7 @@ Status i2c_master_transaction_write_read(
             if (timeout-- == 0)
                 return Error;
         }
+
         /* Clear ADDR flag by reading SR2 register */
         temp = I2Cx->SR2;
         if (I2Cx == I2C1)
@@ -618,6 +621,56 @@ Status i2c_master_transaction_write_read(
         /* Make sure that the STOP bit is cleared by Hardware before CR1 write access */
         while ((I2Cx->CR1&0x200) == 0x200);
 
+    } else if (mode == Polling) {
+        // ------------------------ WRITE ------------------------------------//
+        timeout = 0xFFFF;
+        /* Send START condition */
+        I2Cx->CR1 |= CR1_START_Set;
+        /* Wait until SB flag is set: EV5 */
+        while ((I2Cx->SR1&0x0001) != 0x0001)
+        {
+            if (timeout-- == 0)
+                return Error;
+        }
+
+        /* Send slave address */
+        /* Reset the address bit0 for write*/
+        /* Send the slave address */
+        I2Cx->DR = (slave_address << 1) & OAR1_ADD0_Reset;
+        timeout = 0xFFFF;
+        /* Wait until ADDR is set: EV6 */
+        while ((I2Cx->SR1 &0x0002) != 0x0002)
+        {
+            if (timeout-- == 0)
+                return Error;
+        }
+
+        /* Clear ADDR flag by reading SR2 register */
+        temp = I2Cx->SR2;
+        /* Write the first data in DR register (EV8_1) */
+        I2Cx->DR = *tx_buffer;
+        /* Increment */
+        tx_buffer++;
+        /* Decrement the number of bytes to be written */
+        bytes_to_write--;
+
+        /* While there is data to be written */
+        while (bytes_to_write--)
+        {
+            /* Poll on BTF to receive data because in polling mode we can not guarantee the
+              EV8 software sequence is managed before the current byte transfer completes */
+            while ((I2Cx->SR1 & 0x00004) != 0x000004);
+            /* Send the current byte */
+            I2Cx->DR = *tx_buffer;
+            /* Point to the next byte to be written */
+            tx_buffer++;
+        }
+        /* EV8_2: Wait until BTF is set before programming the STOP */
+        while ((I2Cx->SR1 & 0x00004) != 0x000004);
+
+        // ------------------------ READ -------------------------------------//
+        I2C_Master_BufferRead(I2Cx, rx_buffer, bytes_to_read, Polling,
+                              slave_address << 1);
     }
     return Success;
 }
