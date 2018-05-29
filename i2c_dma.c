@@ -706,13 +706,7 @@ void I2C_Slave_BufferReadWrite(I2C_TypeDef* I2Cx,I2C_ProgrammingModel Mode)
 
 }
 
-/**
-* @brief  Initializes peripherals: I2Cx, GPIO, DMA channels .
-  * @param  None
-  * @retval None
-  */
-void I2C_LowLevel_Init(I2C_TypeDef* I2Cx)
-{
+void i2c_init(I2C_TypeDef* I2Cx, uint32_t speed) {
     GPIO_InitTypeDef  GPIO_InitStructure;
     I2C_InitTypeDef  I2C_InitStructure;
 
@@ -766,7 +760,7 @@ void I2C_LowLevel_Init(I2C_TypeDef* I2Cx)
     I2C_InitStructure.I2C_OwnAddress1 = OwnAddress1;
     I2C_InitStructure.I2C_Ack = I2C_Ack_Enable;
     I2C_InitStructure.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
-    I2C_InitStructure.I2C_ClockSpeed = ClockSpeed;
+    I2C_InitStructure.I2C_ClockSpeed = speed;
     I2C_Init(I2C1, &I2C_InitStructure);
     I2C_InitStructure.I2C_OwnAddress1 = OwnAddress2;
     I2C_Init(I2C2, &I2C_InitStructure);
@@ -816,6 +810,16 @@ void I2C_LowLevel_Init(I2C_TypeDef* I2Cx)
         DMA_Init(I2C2_DMA_CHANNEL_RX, &I2CDMA_InitStructure);
 
     }
+}
+
+/**
+* @brief  Initializes peripherals: I2Cx, GPIO, DMA channels .
+  * @param  None
+  * @retval None
+  */
+void I2C_LowLevel_Init(I2C_TypeDef* I2Cx)
+{
+    i2c_init(I2Cx, I2C_CLOCK_SPEED);
 }
 
 /**

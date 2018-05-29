@@ -103,8 +103,9 @@
 #define I2C_IT_EVT                      ((uint16_t)0x0200)
 #define I2C_IT_ERR                      ((uint16_t)0x0100)
 
-
-#define  ClockSpeed            100000
+#ifndef I2C_CLOCK_SPEED
+#define  I2C_CLOCK_SPEED            100000
+#endif
 
 #define I2C_DIRECTION_TX 0
 #define I2C_DIRECTION_RX 1
@@ -148,6 +149,7 @@ Status i2c_master_buffer_write_byte(I2C_TypeDef* i2c, uint8_t reg, uint8_t value
 
 void I2C_Slave_BufferReadWrite(I2C_TypeDef* I2Cx,I2C_ProgrammingModel Mode);
 void I2C_LowLevel_Init(I2C_TypeDef* I2Cx);
+void i2c_init(I2C_TypeDef* I2Cx, uint32_t speed);
 void I2C_DMAConfig(I2C_TypeDef* I2Cx, uint8_t* pBuffer, uint32_t BufferSize, uint32_t Direction);
 
 #endif
