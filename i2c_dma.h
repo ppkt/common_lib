@@ -141,11 +141,12 @@ typedef enum
 Status I2C_Master_BufferRead(I2C_TypeDef* I2Cx, uint8_t* pBuffer,  uint32_t NumByteToRead, I2C_ProgrammingModel Mode, uint8_t SlaveAddress);
 Status I2C_Master_BufferWrite(I2C_TypeDef* I2Cx, uint8_t* pBuffer,  uint32_t NumByteToWrite, I2C_ProgrammingModel Mode, uint8_t SlaveAddress);
 Status i2c_master_transaction_write_read(
-        I2C_TypeDef* I2Cx, uint8_t* tx_buffer,  uint32_t bytes_to_write,
-        uint8_t* rx_buffer,  uint32_t bytes_to_read, I2C_ProgrammingModel mode,
-        uint8_t slave_address);
+        I2C_TypeDef* I2Cx, uint8_t slave_address, uint8_t* tx_buffer,
+        uint32_t bytes_to_write, uint8_t* rx_buffer,  uint32_t bytes_to_read,
+        I2C_ProgrammingModel mode);
 
-Status i2c_master_buffer_write_byte(I2C_TypeDef* i2c, uint8_t reg, uint8_t value, uint8_t address);
+Status i2c_master_buffer_write_byte(I2C_TypeDef* i2c, uint8_t address,
+                                    uint8_t reg, uint8_t value);
 
 void I2C_Slave_BufferReadWrite(I2C_TypeDef* I2Cx,I2C_ProgrammingModel Mode);
 void I2C_LowLevel_Init(I2C_TypeDef* I2Cx);
