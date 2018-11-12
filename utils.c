@@ -167,13 +167,9 @@ void led_toggle() {
             gpio = GPIOA;
             pin = GPIO_Pin_1;
             break;
-        case 3:
+        case 4:
             gpio = GPIOB;
             pin = GPIO_Pin_12;
-            break;
-        case 4:
-            gpio = GPIOA;
-            pin = GPIO_Pin_1;
             break;
         default:
             hacf();
