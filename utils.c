@@ -203,5 +203,9 @@ inline uint32_t sadd32(uint32_t a, uint32_t b) {
 }
 
 inline uint8_t check_bit(uint32_t variable, uint8_t pos) {
-    return (variable >> pos) & 1;
+    return (uint8_t) ((variable >> pos) & 1);
+}
+
+inline uint32_t toggle_bit(uint32_t variable, uint8_t pos) {
+     return variable ^ (1 << pos);
 }
