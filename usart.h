@@ -22,6 +22,7 @@ void usart_printf(USART_TypeDef* usart, const char *format, ...);
 #define usart1_print(string) usart_print(USART1,string)
 #define usart1_printf(format,...) usart_printf(USART1,format,__VA_ARGS__)
 #define print_variable_int(variable) usart_printf(USART1,"%s = %d\r\n",#variable,variable)
+#define print_variable_hex(variable) usart_printf(USART1,"%s = 0x%.2x\r\n",#variable,variable)
 #define print_variable_float(variable, precision) usart_printf(USART1,"%s = %.*f\r\n",#variable,precision,variable)
 
 void usart_string_append(char c);
