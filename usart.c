@@ -40,9 +40,6 @@ void usart1_init(unsigned int speed)
 
     USART_Init(USART1, &USART_InitStructure);
 
-    // Enable interrupts
-    USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
-
     // Enable usart
     USART_Cmd(USART1, ENABLE);
 
