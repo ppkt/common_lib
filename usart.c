@@ -1,108 +1,53 @@
+#include <libopencm3/stm32/usart.h>
 #include "usart.h"
 
-void usart1_init(unsigned int speed)
+void usart1_init(uint32_t speed)
 {
-    /* Enable GPIO clock */
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+    // Enable GPIO clock
+    rcc_periph_clock_enable(RCC_GPIOA);
 
-    /* Enable UART clock */
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
+    // Enable UART clock
+    rcc_periph_clock_enable(RCC_USART1);
 
     // Use PA9 and PA10
-    GPIO_InitTypeDef GPIO_InitStructure;
-    USART_InitTypeDef USART_InitStructure;
+    gpio_set_mode(GPIOA, GPIO_MODE_OUTPUT_50_MHZ,
+                  GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, GPIO_USART1_TX);
+    gpio_set_mode(GPIOA, GPIO_MODE_OUTPUT_50_MHZ,
+                  GPIO_CNF_INPUT_FLOAT, GPIO_USART1_RX);
 
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-    // NVIC
-    NVIC_InitTypeDef NVIC_InitStructure; // Configure the NVIC (nested vector interrupt controller)
-    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_0);
-    NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;   // we want to configure the USART1 interrupts
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;     // this sets the priority group of the USART1 interrupts
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;        // this sets the subpriority inside the group
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;       // the USART1 interrupts are globally enabled
-    NVIC_Init(&NVIC_InitStructure);
-
-    // USART1
-    USART_InitStructure.USART_BaudRate = speed;
-    USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-    USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-    USART_InitStructure.USART_Parity = USART_Parity_No;
-    USART_InitStructure.USART_StopBits = USART_StopBits_1;
-    USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-
-    USART_Init(USART1, &USART_InitStructure);
-
-    // Enable usart
-    USART_Cmd(USART1, ENABLE);
-
+    usart_set_baudrate(USART1, speed);
+    usart_set_mode(USART1, USART_MODE_TX);
+    usart_enable(USART1);
 }
 
-void usart2_init(unsigned int speed)
+void usart2_init(uint32_t speed)
 {
-    /* Enable GPIO clock */
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+    // Enable GPIO clock
+    rcc_periph_clock_enable(RCC_GPIOA);
 
-    /* Enable UART clock */
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+    // Enable UART clock
+    rcc_periph_clock_enable(RCC_USART2);
 
-    // Use PA9 and PA10
-    GPIO_InitTypeDef GPIO_InitStructure;
-    USART_InitTypeDef USART_InitStructure;
+    // Use PA2 and PA3
+    gpio_set_mode(GPIOA, GPIO_MODE_OUTPUT_50_MHZ,
+                  GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, GPIO_USART2_TX);
+    gpio_set_mode(GPIOA, GPIO_MODE_OUTPUT_50_MHZ,
+                  GPIO_CNF_INPUT_FLOAT, GPIO_USART2_RX);
 
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-    // NVIC
-    NVIC_InitTypeDef NVIC_InitStructure; // Configure the NVIC (nested vector interrupt controller)
-    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_0);
-    NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;   // we want to configure the USART1 interrupts
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;     // this sets the priority group of the USART1 interrupts
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;        // this sets the subpriority inside the group
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;       // the USART1 interrupts are globally enabled
-    NVIC_Init(&NVIC_InitStructure);
-
-    // USART2
-    USART_InitStructure.USART_BaudRate = speed;
-    USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-    USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-    USART_InitStructure.USART_Parity = USART_Parity_No;
-    USART_InitStructure.USART_StopBits = USART_StopBits_1;
-    USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-
-    USART_Init(USART2, &USART_InitStructure);
-
-    // Enable interrupts
-    USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
-
-    // Enable usart
-    USART_Cmd(USART2, ENABLE);
-
+    usart_set_baudrate(USART2, speed);
+    usart_set_mode(USART2, USART_MODE_TX);
+    usart_enable(USART2);
 }
 
-void usart_print(USART_TypeDef* usart, char* string)
+void usart_print(uint32_t usart, char* string)
 {
-    u8 a = 0;
+    uint8_t a = 0;
     while (string[a]) {
-        USART_SendData(usart, string[a++]);
-        while (USART_GetFlagStatus(usart, USART_FLAG_TXE) == RESET);
+        usart_send_blocking(usart, string[a++]);
     }
 }
 
-void usart_printf(USART_TypeDef *usart, const char *format, ...)
+void usart_printf(uint32_t usart, const char *format, ...)
 {
     va_list args;
     static char buffer[120];
