@@ -1,4 +1,3 @@
-#include <math.h>
 #include "utils.h"
 
 //void rtc_setup(void) {
@@ -161,9 +160,13 @@ inline uint32_t toggle_bit(uint32_t variable, uint8_t pos) {
 
 volatile uint32_t system_millis;
 
-void systick_setup(void) {
+uint8_t system_precision;
+
+void systick_setup(uint8_t precision) {
+    system_precision = precision;
     // clock rate / 100 to get 10 ms interrupt rate
-    systick_set_reload((uint32_t) (rcc_ahb_frequency / 1e2));
+    systick_set_reload((uint32_t) (rcc_ahb_frequency /
+                                   fast_int_pow(10, (1 + precision))));
     systick_set_clocksource(STK_CSR_CLKSOURCE_AHB);
     systick_counter_enable();
     systick_interrupt_enable();
@@ -175,6 +178,23 @@ void delay_ms(uint32_t time) {
     while (wake > system_millis);
 }
 
+// For quick calculation of power when base and exponent are integers
+// https://stackoverflow.com/a/101613
+int32_t fast_int_pow(int32_t base, uint32_t exponent) {
+    int32_t result = 1;
+    while (1) {
+        if (exponent & 1) {
+            result *= base;
+        }
+        exponent >>= 1;
+        if (!exponent) {
+            break;
+        }
+        base *= base;
+    }
+    return result;
+}
+
 void sys_tick_handler(void) {
-    system_millis += 10;
+    system_millis += fast_int_pow(10, 2u - system_precision);
 }
