@@ -10,9 +10,9 @@ void usart1_init(uint32_t speed)
     rcc_periph_clock_enable(RCC_USART1);
 
     // Use PA9 and PA10
-    gpio_set_mode(GPIOA, GPIO_MODE_OUTPUT_50_MHZ,
+    gpio_set_mode(GPIO_BANK_USART1_TX, GPIO_MODE_OUTPUT_50_MHZ,
                   GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, GPIO_USART1_TX);
-    gpio_set_mode(GPIOA, GPIO_MODE_OUTPUT_50_MHZ,
+    gpio_set_mode(GPIO_BANK_USART1_RX, GPIO_MODE_OUTPUT_50_MHZ,
                   GPIO_CNF_INPUT_FLOAT, GPIO_USART1_RX);
 
     usart_set_baudrate(USART1, speed);
@@ -29,9 +29,9 @@ void usart2_init(uint32_t speed)
     rcc_periph_clock_enable(RCC_USART2);
 
     // Use PA2 and PA3
-    gpio_set_mode(GPIOA, GPIO_MODE_OUTPUT_50_MHZ,
+    gpio_set_mode(GPIO_BANK_USART2_TX, GPIO_MODE_OUTPUT_50_MHZ,
                   GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, GPIO_USART2_TX);
-    gpio_set_mode(GPIOA, GPIO_MODE_OUTPUT_50_MHZ,
+    gpio_set_mode(GPIO_BANK_USART2_RX, GPIO_MODE_OUTPUT_50_MHZ,
                   GPIO_CNF_INPUT_FLOAT, GPIO_USART2_RX);
 
     usart_set_baudrate(USART2, speed);

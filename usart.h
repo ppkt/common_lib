@@ -1,8 +1,10 @@
 #pragma once
-#include "utils.h"
+#include <libopencm3/stm32/usart.h>
 
 #include <stdio.h>
 #include <stdarg.h>
+
+#include "utils.h"
 
 void usart1_init(uint32_t speed);
 void usart2_init(uint32_t speed);
