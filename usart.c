@@ -57,6 +57,12 @@ void usart_printf(uint32_t usart, const char *format, ...)
     usart_print(usart, buffer);
 }
 
+//int putchar(int c) {
+//    usart_send_blocking(USART1, (uint16_t) c);
+//    return 0;
+//}
+
+
 #ifdef USE_FULL_ASSERT
 void assert_failed(uint8_t* msg, uint8_t* file, uint32_t line) {
       usart_printf(USART1, "Assert: %s failed: %s:%d\r\n", msg, file, (int)line);
