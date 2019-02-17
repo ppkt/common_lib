@@ -5,6 +5,11 @@
 #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/stm32/i2c.h>
 
+typedef struct i2c_device {
+    uint32_t i2c;
+    uint8_t address;
+} i2c_device;
+
 void i2c1_init(enum i2c_speeds speed);
 
 bool i2c_master_transaction_write_read(
