@@ -100,7 +100,7 @@ void led_init(void) {
     gpio_set_mode(gpio, GPIO_MODE_OUTPUT_2_MHZ,
                   GPIO_CNF_OUTPUT_PUSHPULL, pin);
 
-    gpio_set(gpio, pin);
+    gpio_clear(gpio, pin);
 }
 
 void led_toggle() {
