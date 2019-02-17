@@ -52,11 +52,13 @@ bool i2c_wait_for_address(uint32_t i2c) {
 }
 
 void i2c_scan_bus(uint32_t i2c) {
+    usart1_print("Begin scanning!\r\n");
     for (uint8_t addr = 0x01; addr < 0xFF >> 1; ++addr) {
         if (i2c_check_presence(i2c, addr)) {
             usart1_printf("Device found at addr 0x%.2x\r\n", addr);
         }
     }
+    usart1_print("Scan completed!\r\n");
 }
 
 bool i2c_master_transaction_write_read(
@@ -74,6 +76,7 @@ bool i2c_master_write(uint32_t i2c, uint8_t slave_address, uint8_t *tx_buffer,
 }
 
 // Checks if device with provided address is present (sends ACK for address)
+// returns `true` if device is present, `false` otherwise
 bool i2c_check_presence(uint32_t i2c, uint8_t addr) {
     i2c_send_start(i2c);
     I2C_WAIT_FOR_START(i2c);
