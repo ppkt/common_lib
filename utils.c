@@ -58,41 +58,61 @@
 //    RTC_WaitForLastTask();
 //}
 
+void get_led_data(uint32_t *gpio, uint16_t *pin, uint32_t *rcc_clock);
 
-void led_init(void) {
-    uint32_t rcc_clock = 0;
-    uint16_t pin = 0;
-    uint32_t gpio = 0;
-
+void get_led_data(uint32_t *gpio, uint16_t *pin, uint32_t *rcc_clock) {
     switch (LED_INDICATOR) {
         case 1:
             // PC13
-            rcc_clock = RCC_GPIOC;
-            pin = GPIO13;
-            gpio = GPIOC;
+            *gpio = GPIOC;
+            *pin = GPIO13;
             break;
         case 2:
             // PA1
-            rcc_clock = RCC_GPIOA;
-            pin = GPIO1;
-            gpio = GPIOA;
+            *gpio = GPIOA;
+            *pin = GPIO1;
             break;
         case 3:
             // PA8 PA9;
-            rcc_clock = RCC_GPIOC;
-            pin = GPIO8 | GPIO9;
-            gpio = GPIOA;
+            *gpio = GPIOA;
+            *pin = GPIO8 | GPIO9;
             break;
         case 4:
             // PB12
-            rcc_clock = RCC_GPIOB;
-            pin = GPIO12;
-            gpio = GPIOB;
+            *gpio = GPIOB;
+            *pin = GPIO12;
             break;
         default:
             hacf();
             break;
     }
+
+    if (!rcc_clock)
+        return;
+
+    switch (LED_INDICATOR) {
+        case 1:
+            *rcc_clock = RCC_GPIOC;
+            break;
+        case 2:
+        case 3:
+            *rcc_clock = RCC_GPIOA;
+            break;
+        case 4:
+            *rcc_clock = RCC_GPIOB;
+            break;
+        default:
+            hacf();
+            break;
+    }
+}
+
+void led_init(void) {
+    uint32_t gpio;
+    uint16_t pin;
+    uint32_t rcc_clock;
+
+    get_led_data(&gpio, &pin, &rcc_clock);
 
     // Enable GPIO clock
     rcc_periph_clock_enable(rcc_clock);
@@ -104,36 +124,35 @@ void led_init(void) {
 }
 
 void led_toggle() {
-    uint32_t gpio = 0;
-    uint16_t pin = 0;
+    uint32_t gpio;
+    uint16_t pin;
 
-    switch (LED_INDICATOR) {
-        case 1:
-            gpio = GPIOC;
-            pin = GPIO13;
-            break;
-        case 2:
-            gpio = GPIOA;
-            pin = GPIO1;
-            break;
-        case 4:
-            gpio = GPIOB;
-            pin = GPIO12;
-            break;
-        default:
-            hacf();
-    }
+    get_led_data(&gpio, &pin, NULL);
 
     // Toggles LED state on dev board
     gpio_toggle(gpio, pin);
 }
 
+void led_set(bool new_state) {
+    uint32_t gpio;
+    uint16_t pin;
+
+    get_led_data(&gpio, &pin, NULL);
+
+    if (new_state) {
+        gpio_set(gpio, pin);
+    } else {
+        gpio_clear(gpio, pin);
+    }
+}
+
 void hacf(void) {
+    led_set(0);
     while (1) {
-        led_toggle();
         delay_ms(30);
         led_toggle();
         delay_ms(300);
+        led_toggle();
     }
 }
 

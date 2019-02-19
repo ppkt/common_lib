@@ -1,10 +1,11 @@
 #pragma once
+#include <stdlib.h>
+
 #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/cm3/systick.h>
 #include <libopencm3/cm3/nvic.h>
 #include <libopencm3/stm32/timer.h>
-#include <stdint-gcc.h>
 
 #ifdef STM32F10X_MD
 #define U_ID_PTR            (0x1FFFF7E8)
@@ -32,6 +33,7 @@ void systick_setup(uint8_t precision);
 void delay_ms(uint32_t time);
 void led_init(void);
 void led_toggle(void);
+void led_set(bool new_state);
 
 uint8_t sadd8(uint8_t a, uint8_t b);
 uint16_t sadd16(uint16_t a, uint16_t b);
