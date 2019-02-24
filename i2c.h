@@ -5,6 +5,9 @@
 #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/stm32/i2c.h>
 
+#include "utils.h"
+#include "usart.h"
+
 typedef struct i2c_device {
     uint32_t i2c;
     uint8_t address;

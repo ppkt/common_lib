@@ -1,6 +1,4 @@
 #include "i2c.h"
-#include "utils.h"
-#include "usart.h"
 
 #define I2C_WAIT_FOR_START(i2c) while (!((I2C_SR1(i2c) & I2C_SR1_SB) & \
     (I2C_SR2(i2c) & (I2C_SR2_MSL | I2C_SR2_BUSY))))
