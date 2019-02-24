@@ -39,7 +39,7 @@ void usart2_init(uint32_t speed)
     usart_enable(USART2);
 }
 
-void usart_print(uint32_t usart, char* string)
+void usart_print(uint32_t usart, const char* string)
 {
     uint8_t a = 0;
     while (string[a]) {
@@ -62,10 +62,15 @@ void usart_printf(uint32_t usart, const char *format, ...)
 //    return 0;
 //}
 
+void cm3_assert_failed_verbose(const char *file, int line, const char *func,
+                               const char *assert_expr) {
+    usart1_printf("Assert failed in file %s:%d in function %s:\r\n%s\r\n",
+            file, line, func, assert_expr);
 
-#ifdef USE_FULL_ASSERT
-void assert_failed(uint8_t* msg, uint8_t* file, uint32_t line) {
-      usart_printf(USART1, "Assert: %s failed: %s:%d\r\n", msg, file, (int)line);
-      hacf();
+    hacf();
+};
+
+void cm3_assert_failed(void)
+{
+    hacf();
 }
-#endif
