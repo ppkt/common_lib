@@ -27,7 +27,7 @@
 #define PRECISION_MEDIUM 1
 #define PRECISION_HIGH 2
 
-void hacf(void);
+void hacf(void) __attribute__((__noreturn__));
 //void rtc_setup(void);
 void systick_setup(uint8_t precision);
 void delay_ms(uint32_t time);
