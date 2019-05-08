@@ -1,5 +1,6 @@
 #include "i2c.h"
 
+#ifdef STM32F1
 #define I2C_WAIT_FOR_START(i2c) while (!((I2C_SR1(i2c) & I2C_SR1_SB) & \
     (I2C_SR2(i2c) & (I2C_SR2_MSL | I2C_SR2_BUSY))))
 
@@ -83,3 +84,4 @@ bool i2c_check_presence(uint32_t i2c, uint8_t addr) {
     i2c_send_stop(i2c);
     return !error;
 }
+#endif
