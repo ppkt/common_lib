@@ -71,7 +71,8 @@ void led_init(void) {
   }
 
 #ifdef STM32F1
-  gpio_set_mode(gpio, GPIO_MODE_OUTPUT_2_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, port);
+  gpio_set_mode(LED_PORT, GPIO_MODE_OUTPUT_2_MHZ, GPIO_CNF_OUTPUT_PUSHPULL,
+                LED_PIN);
 #elif STM32F0
   gpio_mode_setup(LED_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, LED_PIN);
 #endif
