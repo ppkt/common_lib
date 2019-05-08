@@ -58,123 +58,69 @@
 //    RTC_WaitForLastTask();
 //}
 
-void get_led_data(uint32_t *gpio, uint16_t *pin, uint32_t *rcc_clock);
-
-void get_led_data(uint32_t *gpio, uint16_t *pin, uint32_t *rcc_clock) {
-    switch (LED_INDICATOR) {
-        case 1:
-            // PC13
-            *gpio = GPIOC;
-            *pin = GPIO13;
-            break;
-        case 2:
-            // PA1
-            *gpio = GPIOA;
-            *pin = GPIO1;
-            break;
-        case 3:
-            // PA8 PA9;
-            *gpio = GPIOA;
-            *pin = GPIO8 | GPIO9;
-            break;
-        case 4:
-            // PB12
-            *gpio = GPIOB;
-            *pin = GPIO12;
-            break;
-        default:
-            hacf();
-            break;
-    }
-
-    if (!rcc_clock)
-        return;
-
-    switch (LED_INDICATOR) {
-        case 1:
-            *rcc_clock = RCC_GPIOC;
-            break;
-        case 2:
-        case 3:
-            *rcc_clock = RCC_GPIOA;
-            break;
-        case 4:
-            *rcc_clock = RCC_GPIOB;
-            break;
-        default:
-            hacf();
-            break;
-    }
-}
 
 void led_init(void) {
-    uint32_t gpio;
-    uint16_t pin;
-    uint32_t rcc_clock;
 
-    get_led_data(&gpio, &pin, &rcc_clock);
+  // Enable GPIO clock
+  if (LED_PORT == GPIOA) {
+    rcc_periph_clock_enable(RCC_GPIOA);
+  } else if (LED_PORT == GPIOB) {
+    rcc_periph_clock_enable(RCC_GPIOB);
+  } else if (LED_PORT == GPIOC) {
+    rcc_periph_clock_enable(RCC_GPIOC);
+  }
 
-    // Enable GPIO clock
-    rcc_periph_clock_enable(rcc_clock);
+#ifdef STM32F1
+  gpio_set_mode(gpio, GPIO_MODE_OUTPUT_2_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, port);
+#elif STM32F0
+  gpio_mode_setup(LED_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, LED_PIN);
+#endif
 
-    gpio_set_mode(gpio, GPIO_MODE_OUTPUT_2_MHZ,
-                  GPIO_CNF_OUTPUT_PUSHPULL, pin);
-
-    gpio_clear(gpio, pin);
+  gpio_clear(LED_PORT, LED_PIN);
 }
 
 void led_toggle() {
-    uint32_t gpio;
-    uint16_t pin;
-
-    get_led_data(&gpio, &pin, NULL);
-
-    // Toggles LED state on dev board
-    gpio_toggle(gpio, pin);
+  // Toggles LED state on dev board
+  gpio_toggle(LED_PORT, LED_PIN);
 }
 
 void led_set(bool new_state) {
-    uint32_t gpio;
-    uint16_t pin;
-
-    get_led_data(&gpio, &pin, NULL);
-
-    if (new_state) {
-        gpio_set(gpio, pin);
-    } else {
-        gpio_clear(gpio, pin);
-    }
+  if (new_state) {
+    gpio_set(LED_PORT, LED_PIN);
+  } else {
+    gpio_clear(LED_PORT, LED_PIN);
+  }
 }
 
 void hacf(void) {
-    led_set(0);
-    while (1) {
-        delay_ms(30);
-        led_toggle();
-        delay_ms(300);
-        led_toggle();
-    }
+  led_set(0);
+  while (1) {
+    delay_ms(30);
+    led_toggle();
+    delay_ms(300);
+    led_toggle();
+  }
 }
 
 // Saturated add functions for 8 / 16 / 32 unsigned integers
 inline uint8_t sadd8(uint8_t a, uint8_t b) {
-    return (a > 0xFF - b) ? 0xFF : a + b;
+  return (a > 0xFF - b) ? 0xFF : a + b;
 }
 
 inline uint16_t sadd16(uint16_t a, uint16_t b) {
-    return (a > 0xFFFF - b) ? 0xFFFF : a + b;
+  return (a > 0xFFFF - b) ? 0xFFFF : a + b;
 }
 
 inline uint32_t sadd32(uint32_t a, uint32_t b) {
-    return (a > 0xFFFFFFFF - b) ? 0xFFFFFFFF : a + b;
+  return (a > 0xFFFFFFFF - b) ? 0xFFFFFFFF : a + b;
 }
 
 inline uint8_t check_bit(uint32_t variable, uint8_t pos) {
-    return (uint8_t) ((variable >> pos) & 1);
+  return (uint8_t)((variable >> pos) & 1u);
 }
 
 inline uint32_t toggle_bit(uint32_t variable, uint8_t pos) {
-    return variable ^ (1 << pos);
+  return variable ^ (1u << pos);
 }
 
 volatile uint32_t system_millis;
@@ -182,38 +128,72 @@ volatile uint32_t system_millis;
 uint8_t system_precision;
 
 void systick_setup(uint8_t precision) {
-    system_precision = precision;
-    // clock rate / 100 to get 10 ms interrupt rate
-    systick_set_reload((uint32_t) (rcc_ahb_frequency /
-                                   fast_int_pow(10, (1 + precision))));
-    systick_set_clocksource(STK_CSR_CLKSOURCE_AHB);
-    systick_counter_enable();
-    systick_interrupt_enable();
+  system_precision = precision;
+  // clock rate / 100 to get 10 ms interrupt rate
+  systick_set_reload(
+      (uint32_t)(rcc_ahb_frequency / fast_int_pow(10, (1 + precision))));
+  systick_set_clocksource(STK_CSR_CLKSOURCE_AHB);
+  systick_counter_enable();
+  systick_interrupt_enable();
 }
 
 // Due to some technical reasons, this function is rounded to 10 ms
 void delay_ms(uint32_t time) {
-    uint32_t wake = system_millis + time;
-    while (wake > system_millis);
+  uint32_t wake = system_millis + time;
+  while (wake > system_millis)
+    ;
 }
 
 // For quick calculation of power when base and exponent are integers
 // https://stackoverflow.com/a/101613
 int32_t fast_int_pow(int32_t base, uint32_t exponent) {
-    int32_t result = 1;
-    while (1) {
-        if (exponent & 1) {
-            result *= base;
-        }
-        exponent >>= 1;
-        if (!exponent) {
-            break;
-        }
-        base *= base;
+  int32_t result = 1;
+  while (1) {
+    if (exponent & 1) {
+      result *= base;
     }
-    return result;
+    exponent >>= 1;
+    if (!exponent) {
+      break;
+    }
+    base *= base;
+  }
+  return result;
 }
 
 void sys_tick_handler(void) {
-    system_millis += fast_int_pow(10, 2u - system_precision);
+  system_millis += fast_int_pow(10, 2u - system_precision);
+}
+
+void setup_delay_timer(uint32_t timer) {
+  enum rcc_periph_clken rcc_tim;
+  switch (timer) {
+  case TIM1:
+    rcc_tim = RCC_TIM1;
+    break;
+  case TIM2:
+    rcc_tim = RCC_TIM2;
+    break;
+  case TIM3:
+    rcc_tim = RCC_TIM3;
+    break;
+  default:
+    hacf();
+    return;
+  }
+
+  rcc_periph_clock_enable(rcc_tim);
+  // microsecond counter
+  timer_set_prescaler(timer, (rcc_ahb_frequency / 2) / 1e6 - 1);
+  timer_set_period(timer, 0xffff);
+  timer_one_shot_mode(timer);
+}
+
+void delay_us(uint32_t timer, uint16_t delay) {
+  TIM_ARR(timer) = ssub(delay - 1, 3) + 1;
+  TIM_EGR(timer) = TIM_EGR_UG;
+  TIM_CR1(timer) |= TIM_CR1_CEN;
+  // timer_enable_counter;
+  while (TIM_CR1(timer) & TIM_CR1_CEN)
+    ;
 }
