@@ -59,8 +59,7 @@ void spi_init(uint32_t spi) {
   spi_enable(spi);
 }
 
-void spi_send_transaction(uint32_t spi, const uint8_t *tx, uint8_t *rx,
-                          uint8_t size) {
+void spi_send_recv(uint32_t spi, const uint8_t *tx, uint8_t *rx, uint8_t size) {
   for (uint8_t i = 0; i < size; ++i) {
     spi_send(spi, tx[i]);
     SPI_WAIT_FOR_TX_EMPTY(spi);

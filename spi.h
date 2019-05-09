@@ -19,6 +19,7 @@
 
 typedef struct spi_device {
   uint32_t spi;
+  pin nss;
 } spi_device;
 
 /**
@@ -28,10 +29,9 @@ typedef struct spi_device {
 void spi_init(uint32_t spi);
 
 /**
- * Send / receive data to SPI slave in bulk.
+ * Send / receive data to SPI device in bulk.
  * WARNING! Because it's possible that there could be more than one device on
  * SPI bus, it's required to manually pull NSS pin down before calling this
  * function (and pulling it up afterwards).
  */
-void spi_send_transaction(uint32_t spi, const uint8_t *tx, uint8_t *rx,
-                          uint8_t size);
+void spi_send_recv(uint32_t spi, const uint8_t *tx, uint8_t *rx, uint8_t size);
