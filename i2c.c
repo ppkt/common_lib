@@ -10,7 +10,7 @@
 #define _IF_ADDR(i2c) ((I2C_SR1(i2c) & I2C_SR1_ADDR) == 0)
 #define _IF_TxE(i2c) (I2C_SR1(i2c) & I2C_SR1_TxE) == 0
 
-bool i2c_wait_for_address(uint32_t i2c);
+error_t i2c_wait_for_address(uint32_t i2c);
 
 void i2c1_init(enum i2c_speeds speed) {
   // Enable I2C clock
@@ -39,15 +39,15 @@ void i2c1_init(enum i2c_speeds speed) {
   i2c_peripheral_enable(I2C1);
 }
 
-bool i2c_wait_for_address(uint32_t i2c) {
+error_t i2c_wait_for_address(uint32_t i2c) {
   uint16_t timeout = 0;
   while (!(I2C_SR1(i2c) & I2C_SR1_ADDR)) {
     timeout++;
     if (timeout == 0x08FF) {
-      return 1;
+      return E_I2C_TIMEOUT;
     }
   }
-  return 0;
+  return E_SUCCESS;
 }
 
 void i2c_scan_bus(uint32_t i2c) {
@@ -61,20 +61,20 @@ void i2c_scan_bus(uint32_t i2c) {
   usart1_print("Scan completed!\r\n");
 }
 
-bool i2c_master_transaction_write_read(uint32_t i2c, uint8_t slave_address,
-                                       uint8_t *tx_buffer,
-                                       uint32_t bytes_to_write,
-                                       uint8_t *rx_buffer,
-                                       uint32_t bytes_to_read) {
+error_t i2c_master_transaction_write_read(uint32_t i2c, uint8_t slave_address,
+                                          uint8_t *tx_buffer,
+                                          uint32_t bytes_to_write,
+                                          uint8_t *rx_buffer,
+                                          uint32_t bytes_to_read) {
   i2c_transfer7(i2c, slave_address, tx_buffer, bytes_to_write, rx_buffer,
                 bytes_to_read);
-  return false;
+  return E_SUCCESS;
 }
 
-bool i2c_master_write(uint32_t i2c, uint8_t slave_address, uint8_t *tx_buffer,
-                      uint32_t bytes_to_write) {
+error_t i2c_master_write(uint32_t i2c, uint8_t slave_address,
+                         uint8_t *tx_buffer, uint32_t bytes_to_write) {
   i2c_transfer7(i2c, slave_address, tx_buffer, bytes_to_write, 0, 0);
-  return false;
+  return E_SUCCESS;
 }
 
 // Checks if device with provided address is present (sends ACK for address)
@@ -83,8 +83,8 @@ bool i2c_check_presence(uint32_t i2c, uint8_t addr) {
   i2c_send_start(i2c);
   I2C_WAIT_FOR_START(i2c);
   i2c_send_7bit_address(i2c, addr, I2C_WRITE);
-  bool error = i2c_wait_for_address(i2c);
+  error_t error = i2c_wait_for_address(i2c);
   i2c_send_stop(i2c);
-  return !error;
+  return error == E_SUCCESS;
 }
 #endif
