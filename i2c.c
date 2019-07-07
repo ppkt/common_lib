@@ -53,7 +53,6 @@ error_t i2c_wait_for_address(uint32_t i2c) {
 void i2c_scan_bus(uint32_t i2c) {
   usart1_print("Begin scanning!\r\n");
   for (uint8_t addr = 0x01; addr < (0xFFu >> 1u); ++addr) {
-    print_variable_int(addr);
     if (i2c_check_presence(i2c, addr)) {
       usart1_printf("Device found at addr 0x%.2x\r\n", addr);
     }
