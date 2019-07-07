@@ -1,17 +1,17 @@
 #pragma once
 #include <stdlib.h>
 
+#include <libopencm3/cm3/nvic.h>
+#include <libopencm3/cm3/systick.h>
 #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/stm32/rcc.h>
-#include <libopencm3/cm3/systick.h>
-#include <libopencm3/cm3/nvic.h>
 #include <libopencm3/stm32/timer.h>
 
-#ifdef STM32F10X_MD
-#define U_ID_PTR            (0x1FFFF7E8)
-#define U_ID_0 (*(uint32_t*)(U_ID_PTR))
-#define U_ID_1 (*(uint32_t*)(U_ID_PTR + 4))
-#define U_ID_2 (*(uint32_t*)(U_ID_PTR + 8))
+#ifdef STM32F1
+#define U_ID_PTR (0x1FFFF7E8)
+#define U_ID_0 (*(uint32_t *)(U_ID_PTR))
+#define U_ID_1 (*(uint32_t *)(U_ID_PTR + 4))
+#define U_ID_2 (*(uint32_t *)(U_ID_PTR + 8))
 #else
 #define U_ID_0 0xFFFFFFFF
 #define U_ID_1 0xFFFFFFFF
@@ -42,8 +42,10 @@ typedef enum {
 #define PRECISION_MEDIUM 1
 #define PRECISION_HIGH 2
 
+#define sizeof_a(a) (sizeof(a) / sizeof(a[0]))
+
 void hacf(void) __attribute__((__noreturn__));
-//void rtc_setup(void);
+// void rtc_setup(void);
 void systick_setup(uint8_t precision);
 void delay_ms(uint32_t time);
 void led_init(void);
@@ -80,30 +82,33 @@ int32_t fast_int_pow(int32_t base, uint32_t exponent);
            : fast_abs32)(x)
 
 inline uint8_t fast_abs8(int8_t i) {
-    if (i < 0)
-        i = -i;
-    return (uint8_t) i;
+  if (i < 0)
+    i = -i;
+  return (uint8_t)i;
 }
 
 inline uint16_t fast_abs16(int16_t i) {
-    if (i < 0)
-        i = -i;
-    return (uint16_t) i;
+  if (i < 0)
+    i = -i;
+  return (uint16_t)i;
 }
 
 inline uint32_t fast_abs32(int32_t i) {
-    if (i < 0)
-        i = -i;
-    return (uint32_t) i;
+  if (i < 0)
+    i = -i;
+  return (uint32_t)i;
 }
 
-#define max(a, b) \
-  ({ __typeof__ (a) _a = (a); \
-      __typeof__ (b) _b = (b); \
-    _a > _b ? _a : _b; })
+#define max(a, b)                                                              \
+  ({                                                                           \
+    __typeof__(a) _a = (a);                                                    \
+    __typeof__(b) _b = (b);                                                    \
+    _a > _b ? _a : _b;                                                         \
+  })
 
-#define min(a, b) \
-  ({ __typeof__ (a) _a = (a); \
-      __typeof__ (b) _b = (b); \
-    _a < _b ? _a : _b; })
-
+#define min(a, b)                                                              \
+  ({                                                                           \
+    __typeof__(a) _a = (a);                                                    \
+    __typeof__(b) _b = (b);                                                    \
+    _a < _b ? _a : _b;                                                         \
+  })
