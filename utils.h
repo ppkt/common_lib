@@ -27,6 +27,16 @@ typedef struct {
   uint16_t gpio;
 } pin;
 
+typedef enum {
+  E_SUCCESS = 0,
+  // returned when a pointer was expected but it was empty
+  E_NULL_PTR,
+  // problem with I2C communication
+  E_I2C_TIMEOUT,
+  // other error, unspecified
+  E_UNSPECIFIED = 255,
+} error_t;
+
 // Set precision for systick (low = 100 ms, medium = 10 ms, high = 1 ms)
 #define PRECISION_LOW 0
 #define PRECISION_MEDIUM 1
