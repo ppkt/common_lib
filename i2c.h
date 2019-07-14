@@ -13,6 +13,8 @@ typedef struct i2c_device {
   uint8_t address;
 } i2c_device;
 
+error_t i2c_check_arguments(uint32_t i2c, uint8_t device_address);
+
 void i2c1_init(enum i2c_speeds speed);
 
 error_t i2c_master_transaction_write_read(uint32_t i2c, uint8_t device_address,

@@ -65,15 +65,17 @@ error_t i2c_master_transaction_write_read(uint32_t i2c, uint8_t slave_address,
                                           uint32_t bytes_to_write,
                                           uint8_t *rx_buffer,
                                           uint32_t bytes_to_read) {
+  error_t e = i2c_check_arguments(i2c, slave_address);
   i2c_transfer7(i2c, slave_address, tx_buffer, bytes_to_write, rx_buffer,
                 bytes_to_read);
-  return E_SUCCESS;
+  return e;
 }
 
 error_t i2c_master_write(uint32_t i2c, uint8_t slave_address,
                          uint8_t *tx_buffer, uint32_t bytes_to_write) {
+  error_t e = i2c_check_arguments(i2c, slave_address);
   i2c_transfer7(i2c, slave_address, tx_buffer, bytes_to_write, 0, 0);
-  return E_SUCCESS;
+  return e;
 }
 
 // Checks if device with provided address is present (sends ACK for address)
@@ -85,5 +87,15 @@ bool i2c_check_presence(uint32_t i2c, uint8_t addr) {
   error_t error = i2c_wait_for_address(i2c);
   i2c_send_stop(i2c);
   return error == E_SUCCESS;
+}
+
+error_t i2c_check_arguments(uint32_t i2c, uint8_t device_address) {
+  if ((i2c != I2C1 && i2c != I2C2)) {
+    return E_VALUE_INVALID;
+  }
+  else if (device_address >= 0x7F) {
+    return E_VALUE_INVALID;
+  }
+  return E_SUCCESS;
 }
 #endif
