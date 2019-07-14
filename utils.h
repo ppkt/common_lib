@@ -31,6 +31,8 @@ typedef enum {
   E_SUCCESS = 0,
   // returned when a pointer was expected but it was empty
   E_NULL_PTR,
+  // returned when provided argument has incorrect value
+  E_VALUE_INVALID,
   // problem with I2C communication
   E_I2C_TIMEOUT,
   // other error, unspecified
@@ -98,6 +100,9 @@ inline uint32_t fast_abs32(int32_t i) {
     i = -i;
   return (uint32_t)i;
 }
+
+#define check_error(e) if (e != E_SUCCESS) return e
+#define halt_on_error(e) if (e != E_SUCCESS) hacf()
 
 #define max(a, b)                                                              \
   ({                                                                           \
