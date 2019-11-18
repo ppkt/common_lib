@@ -1,15 +1,12 @@
 #include "i2c.h"
 
 #ifdef STM32F1
-#define I2C_WAIT_FOR_START(i2c)                                                \
-  while (!((I2C_SR1(i2c) & I2C_SR1_SB) &                                       \
-           (I2C_SR2(i2c) & (I2C_SR2_MSL | I2C_SR2_BUSY))))
-
 #define _IF_SB(i2c) ((I2C_SR1(i2c) & I2C_SR1_SB) == 0)
 #define _IF_BTF(i2c) ((I2C_SR1(i2c) & I2C_SR1_BTF) == 0)
 #define _IF_ADDR(i2c) ((I2C_SR1(i2c) & I2C_SR1_ADDR) == 0)
 #define _IF_TxE(i2c) (I2C_SR1(i2c) & I2C_SR1_TxE) == 0
 
+error_t i2c_wait_for_start(uint32_t i2c);
 error_t i2c_wait_for_address(uint32_t i2c);
 
 void i2c1_init(enum i2c_speeds speed) {
@@ -50,6 +47,18 @@ error_t i2c_wait_for_address(uint32_t i2c) {
   return E_SUCCESS;
 }
 
+error_t i2c_wait_for_start(uint32_t i2c) {
+  uint32_t i = 0;
+  while (!((I2C_SR1(i2c) & I2C_SR1_SB) &
+           (I2C_SR2(i2c) & (I2C_SR2_MSL | I2C_SR2_BUSY)))) {
+    ++i;
+    if (i == 0xFFFF) {
+      return E_I2C_TIMEOUT;
+    }
+  }
+  return E_SUCCESS;
+}
+
 void i2c_scan_bus(uint32_t i2c) {
   usart1_print("Begin scanning!\r\n");
   for (uint8_t addr = 0x01; addr < (0xFFu >> 1u); ++addr) {
@@ -82,7 +91,7 @@ error_t i2c_master_write(uint32_t i2c, uint8_t slave_address,
 // returns `true` if device is present, `false` otherwise
 bool i2c_check_presence(uint32_t i2c, uint8_t addr) {
   i2c_send_start(i2c);
-  I2C_WAIT_FOR_START(i2c);
+  if (i2c_wait_for_start(i2c) == E_I2C_TIMEOUT) { return false; }
   i2c_send_7bit_address(i2c, addr, I2C_WRITE);
   error_t error = i2c_wait_for_address(i2c);
   i2c_send_stop(i2c);
