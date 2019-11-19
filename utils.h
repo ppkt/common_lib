@@ -35,6 +35,8 @@ typedef enum {
   E_VALUE_INVALID,
   // problem with I2C communication
   E_I2C_TIMEOUT,
+  // returned when value is too big
+  E_VALUE_TOO_BIG,
   // other error, unspecified
   E_UNSPECIFIED = 255,
 } error_t;
