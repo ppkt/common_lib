@@ -1,0 +1,3 @@
+[submodule "fonts/adafruit_gfx_library"]
+	path = fonts/adafruit_gfx_library
+	url = https://github.com/adafruit/Adafruit-GFX-Library.git
