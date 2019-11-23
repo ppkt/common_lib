@@ -33,4 +33,14 @@ error_t gfx_draw_gfx_pixel(gfx_context *ctx, const gfx_point *pt);
 
 error_t gfx_clear_pixel(gfx_context *ctx, uint16_t x, uint16_t y);
 
-error_t gfx_draw_line(gfx_context *ctx, const gfx_point *p1, const gfx_point *p2);
+error_t gfx_draw_line(gfx_context *ctx, const gfx_point *p1,
+                      const gfx_point *p2);
+
+error_t gfx_draw_rectangle(gfx_context *ctx, const gfx_point *p1,
+                           const gfx_point *p2);
+
+error_t gfx_draw_circle(gfx_context *ctx, const gfx_point *center,
+                        uint16_t radius);
+
+ error_t gfx_fill_rectangle(gfx_context *ctx, const gfx_point *p1,
+                           const gfx_point *p2);

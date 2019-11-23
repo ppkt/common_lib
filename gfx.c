@@ -182,34 +182,106 @@ static error_t _gfx_draw_line_vertical(gfx_context *ctx, const gfx_point *p1,
 
 error_t gfx_draw_line(gfx_context *ctx, const gfx_point *p1,
                       const gfx_point *p2) {
+
+  gfx_point _p1, _p2;
+  check_error(_gfx_min_max_point(p1, p2, &_p1, &_p2));
+
   // Special case for horizontal / vertical lines
-  if (p1->y == p2->y) {
-    if (p1->x > p2->x) {
-      return _gfx_draw_line_horizontal(ctx, p2, p1);
-    } else {
-      return _gfx_draw_line_horizontal(ctx, p1, p2);
-    }
-  } else if (p1->x == p2->x) {
-    if (p1->y > p2->y) {
-      return _gfx_draw_line_vertical(ctx, p2, p1);
-    } else {
-      return _gfx_draw_line_vertical(ctx, p1, p2);
-    }
+  if (_p1.y == _p2.y) {
+    return _gfx_draw_line_horizontal(ctx, &_p1, &_p2);
+  } else if (_p1.x == _p2.x) {
+    return _gfx_draw_line_vertical(ctx, &_p1, &_p2);
   }
 
   // Use Bresenham algorithm
   if (abs(p2->y - p1->y) < abs(p2->x - p1->x)) {
     if (p1->x > p2->x) {
-      _gfx_draw_line_low(ctx, p2, p1);
+      return _gfx_draw_line_low(ctx, p2, p1);
     } else {
-      _gfx_draw_line_low(ctx, p1, p2);
+      return _gfx_draw_line_low(ctx, p1, p2);
     }
   } else {
     if (p1->y > p2->y) {
-      _gfx_draw_line_high(ctx, p2, p1);
+      return _gfx_draw_line_high(ctx, p2, p1);
     } else {
-      _gfx_draw_line_high(ctx, p1, p2);
+      return _gfx_draw_line_high(ctx, p1, p2);
     }
+  }
+}
+
+error_t gfx_draw_rectangle(gfx_context *ctx, const gfx_point *p1,
+                           const gfx_point *p2) {
+  gfx_point _p1, _p2;
+  check_error(_gfx_min_max_point(p1, p2, &_p1, &_p2));
+
+  gfx_point corner_1 = {.x = _p2.x, .y = _p1.y};
+  gfx_point corner_2 = {.x = _p1.x, .y = _p2.y};
+
+  check_error(_gfx_draw_line_horizontal(ctx, &_p1, &corner_1));
+  check_error(_gfx_draw_line_horizontal(ctx, &corner_2, &_p2));
+
+  check_error(_gfx_draw_line_vertical(ctx, &_p1, &corner_2));
+  check_error(_gfx_draw_line_vertical(ctx, &corner_1, &_p2));
+
+  return E_SUCCESS;
+}
+error_t gfx_draw_circle(gfx_context *ctx, const gfx_point *center,
+                        uint16_t radius) {
+  int16_t f = 1 - radius;
+  int16_t d_x = 0;
+  int16_t d_y = -2 * radius;
+  int16_t x = 0;
+  int16_t y = radius;
+
+  gfx_draw_gfx_pixel(ctx,
+                     &(gfx_point){.x = center->x, .y = center->y + radius});
+  gfx_draw_gfx_pixel(ctx,
+                     &(gfx_point){.x = center->x, .y = center->y - radius});
+  gfx_draw_gfx_pixel(ctx,
+                     &(gfx_point){.x = center->x + radius, .y = center->y});
+  gfx_draw_gfx_pixel(ctx,
+                     &(gfx_point){.x = center->x - radius, .y = center->y});
+
+  while (x < y) {
+    if (f >= 0) {
+      --y;
+      d_y += 2;
+      f += d_y;
+    }
+    ++x;
+    d_x += 2;
+    f += d_x + 1;
+
+    check_error(gfx_draw_gfx_pixel(
+        ctx, &(gfx_point){.x = center->x + x, .y = center->y + y}));
+    check_error(gfx_draw_gfx_pixel(
+        ctx, &(gfx_point){.x = center->x - x, .y = center->y + y}));
+    check_error(gfx_draw_gfx_pixel(
+        ctx, &(gfx_point){.x = center->x + x, .y = center->y - y}));
+    check_error(gfx_draw_gfx_pixel(
+        ctx, &(gfx_point){.x = center->x - x, .y = center->y - y}));
+
+    check_error(gfx_draw_gfx_pixel(
+        ctx, &(gfx_point){.x = center->x + y, .y = center->y + x}));
+    check_error(gfx_draw_gfx_pixel(
+        ctx, &(gfx_point){.x = center->x - y, .y = center->y + x}));
+    check_error(gfx_draw_gfx_pixel(
+        ctx, &(gfx_point){.x = center->x + y, .y = center->y - x}));
+    check_error(gfx_draw_gfx_pixel(
+        ctx, &(gfx_point){.x = center->x - y, .y = center->y - x}));
+  }
+
+  return E_SUCCESS;
+}
+
+error_t gfx_fill_rectangle(gfx_context *ctx, const gfx_point *p1,
+                           const gfx_point *p2) {
+  gfx_point _p1, _p2;
+  check_error(_gfx_min_max_point(p1, p2, &_p1, &_p2));
+
+  for (uint16_t y = _p1.y; y <= _p2.y; ++y) {
+    check_error(_gfx_draw_line_horizontal(ctx, &(gfx_point){.x = _p1.x, .y = y},
+                                          &(gfx_point){.x = _p2.x, .y = y}));
   }
 
   return E_SUCCESS;
