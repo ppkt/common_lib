@@ -1,6 +1,24 @@
 #include "gfx.h"
 #include "fonts/adafruit_gfx_library/glcdfont.c"
 
+static error_t _gfx_min_max_point(const gfx_point *p1, const gfx_point *p2,
+                                  gfx_point *out_1, gfx_point *out_2) {
+  if (!out_1 || !out_2) {
+    return E_NULL_PTR;
+  }
+
+  uint16_t min_x = min(p1->x, p2->x);
+  uint16_t max_x = max(p1->x, p2->x);
+  uint16_t min_y = min(p1->y, p2->y);
+  uint16_t max_y = max(p1->y, p2->y);
+
+  out_1->x = min_x;
+  out_1->y = min_y;
+  out_2->x = max_x;
+  out_2->y = max_y;
+  return E_SUCCESS;
+}
+
 error_t gfx_init(gfx_context *ctx, uint8_t *buffer, uint16_t width,
                  uint16_t height) {
   if (!ctx || !buffer) {
