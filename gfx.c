@@ -1,8 +1,8 @@
 #include "gfx.h"
 #include "fonts/adafruit_gfx_library/glcdfont.c"
 
-error_t gfx_init(gfx_context *ctx, uint8_t *buffer, uint8_t width,
-                 uint8_t height) {
+error_t gfx_init(gfx_context *ctx, uint8_t *buffer, uint16_t width,
+                 uint16_t height) {
   if (!ctx || !buffer) {
     return E_NULL_PTR;
   }
@@ -32,7 +32,7 @@ error_t gfx_clear(gfx_context *ctx) {
   return E_SUCCESS;
 }
 
-error_t gfx_draw_pixel(gfx_context *ctx, uint8_t x, uint8_t y) {
+error_t gfx_draw_pixel(gfx_context *ctx, uint16_t x, uint16_t y) {
   if (x >= ctx->width || y >= ctx->height)
     return E_VALUE_TOO_BIG;
 
@@ -48,7 +48,7 @@ error_t gfx_clear_pixel(gfx_context *ctx, uint16_t x, uint16_t y) {
   return E_SUCCESS;
 }
 
-error_t gfx_draw_char(gfx_context *ctx, uint8_t x, uint8_t y, char c) {
+error_t gfx_draw_char(gfx_context *ctx, uint16_t x, uint16_t y, char c) {
 
   //  extern uint8_t font[];
   for (uint8_t i = 0; i < 5; i++) { // Char bitmap = 5 columns
@@ -63,10 +63,10 @@ error_t gfx_draw_char(gfx_context *ctx, uint8_t x, uint8_t y, char c) {
   return E_SUCCESS;
 }
 
-error_t gfx_draw_text(gfx_context *ctx, uint8_t x, uint8_t y,
+error_t gfx_draw_text(gfx_context *ctx, uint16_t x, uint16_t y,
                       const char *string) {
-  uint8_t _x = x;
-  uint8_t _y = y;
+  uint16_t _x = x;
+  uint16_t _y = y;
   uint8_t a = 0;
   while (string[a]) {
     if ((_x + 5) >= ctx->width) {
