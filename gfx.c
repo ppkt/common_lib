@@ -34,7 +34,7 @@ error_t gfx_clear(gfx_context *ctx) {
 
 error_t gfx_draw_pixel(gfx_context *ctx, uint16_t x, uint16_t y) {
   if (x >= ctx->width || y >= ctx->height)
-    return E_VALUE_TOO_BIG;
+    return E_SUCCESS;
 
   ctx->buffer[x + (y / 8) * ctx->width] |= (1u << (y & 7u));
   return E_SUCCESS;
@@ -42,7 +42,7 @@ error_t gfx_draw_pixel(gfx_context *ctx, uint16_t x, uint16_t y) {
 
 error_t gfx_clear_pixel(gfx_context *ctx, uint16_t x, uint16_t y) {
   if (x >= ctx->width || y >= ctx->height)
-    return E_VALUE_TOO_BIG;
+    return E_SUCCESS;
 
   ctx->buffer[x + (y / 8) * ctx->width] &= ~(1u << (y & 7u));
   return E_SUCCESS;
@@ -60,7 +60,7 @@ error_t gfx_draw_char(gfx_context *ctx, uint16_t x, uint16_t y, char c) {
     uint8_t line = font[c * 5 + i];
     for (uint8_t j = 0; j < 8; j++, line >>= 1u) {
       if (line & 1u) {
-        gfx_draw_pixel(ctx, x + i, y + j);
+        check_error(gfx_draw_pixel(ctx, x + i, y + j));
       }
     }
   }
@@ -78,7 +78,7 @@ error_t gfx_draw_text(gfx_context *ctx, uint16_t x, uint16_t y,
       _x = 0;
       _y += 8;
     }
-    gfx_draw_char(ctx, _x, _y, string[a++]);
+    check_error(gfx_draw_char(ctx, _x, _y, string[a++]));
     _x += 5;
   }
   return E_SUCCESS;
@@ -98,7 +98,7 @@ static error_t _gfx_draw_line_low(gfx_context *ctx, const gfx_point *p1,
   int16_t y = p1->y;
 
   for (uint16_t x = p1->x; x < p2->x; ++x) {
-    gfx_draw_gfx_pixel(ctx, &(gfx_point){.x = x, .y = y});
+    check_error(gfx_draw_gfx_pixel(ctx, &(gfx_point){.x = x, .y = y}));
 
     if (d > 0) {
       y += y_i;
@@ -124,7 +124,7 @@ static error_t _gfx_draw_line_high(gfx_context *ctx, const gfx_point *p1,
   int16_t x = p1->x;
 
   for (uint16_t y = p1->y; y < p2->y; ++y) {
-    gfx_draw_gfx_pixel(ctx, &(gfx_point){.x = x, .y = y});
+    check_error(gfx_draw_gfx_pixel(ctx, &(gfx_point){.x = x, .y = y}));
 
     if (d > 0) {
       x += x_i;
@@ -143,7 +143,7 @@ static error_t _gfx_draw_line_horizontal(gfx_context *ctx, const gfx_point *p1,
   }
 
   for (uint16_t x = p1->x; x <= p2->x; ++x) {
-    gfx_draw_gfx_pixel(ctx, &(gfx_point){.x = x, .y = p1->y});
+    check_error(gfx_draw_gfx_pixel(ctx, &(gfx_point){.x = x, .y = p1->y}));
   }
 
   return E_SUCCESS;
@@ -156,7 +156,7 @@ static error_t _gfx_draw_line_vertical(gfx_context *ctx, const gfx_point *p1,
   }
 
   for (uint16_t y = p1->y; y <= p2->y; ++y) {
-    gfx_draw_gfx_pixel(ctx, &(gfx_point){.x = p1->x, .y = y});
+    check_error(gfx_draw_gfx_pixel(ctx, &(gfx_point){.x = p1->x, .y = y}));
   }
 
   return E_SUCCESS;
