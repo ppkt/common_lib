@@ -48,6 +48,11 @@ error_t gfx_clear_pixel(gfx_context *ctx, uint16_t x, uint16_t y) {
   return E_SUCCESS;
 }
 
+error_t gfx_draw_gfx_pixel(gfx_context *ctx, const gfx_point *pt) {
+  check_error(gfx_draw_pixel(ctx, pt->x, pt->y));
+  return E_SUCCESS;
+}
+
 error_t gfx_draw_char(gfx_context *ctx, uint16_t x, uint16_t y, char c) {
 
   //  extern uint8_t font[];
@@ -76,5 +81,118 @@ error_t gfx_draw_text(gfx_context *ctx, uint16_t x, uint16_t y,
     gfx_draw_char(ctx, _x, _y, string[a++]);
     _x += 5;
   }
+  return E_SUCCESS;
+}
+
+static error_t _gfx_draw_line_low(gfx_context *ctx, const gfx_point *p1,
+                                  const gfx_point *p2) {
+  int16_t d_x = p2->x - p1->x;
+  int16_t d_y = p2->y - p1->y;
+  int8_t y_i = 1;
+
+  if (d_y < 0) {
+    y_i = -1;
+    d_y = -d_y;
+  }
+  int16_t d = 2 * d_y - d_x;
+  int16_t y = p1->y;
+
+  for (uint16_t x = p1->x; x < p2->x; ++x) {
+    gfx_draw_gfx_pixel(ctx, &(gfx_point){.x = x, .y = y});
+
+    if (d > 0) {
+      y += y_i;
+      d -= 2 * d_x;
+    }
+    d += 2 * d_y;
+  }
+
+  return E_SUCCESS;
+}
+
+static error_t _gfx_draw_line_high(gfx_context *ctx, const gfx_point *p1,
+                                   const gfx_point *p2) {
+  int16_t d_x = p2->x - p1->x;
+  int16_t d_y = p2->y - p1->y;
+  int8_t x_i = 1;
+
+  if (d_x < 0) {
+    x_i = -1;
+    d_x = -d_x;
+  }
+  int16_t d = 2 * d_x - d_y;
+  int16_t x = p1->x;
+
+  for (uint16_t y = p1->y; y < p2->y; ++y) {
+    gfx_draw_gfx_pixel(ctx, &(gfx_point){.x = x, .y = y});
+
+    if (d > 0) {
+      x += x_i;
+      d -= 2 * d_y;
+    }
+    d += 2 * d_x;
+  }
+
+  return E_SUCCESS;
+}
+
+static error_t _gfx_draw_line_horizontal(gfx_context *ctx, const gfx_point *p1,
+                                         const gfx_point *p2) {
+  if (p1->y != p2->y) {
+    return E_VALUE_INVALID;
+  }
+
+  for (uint16_t x = p1->x; x <= p2->x; ++x) {
+    gfx_draw_gfx_pixel(ctx, &(gfx_point){.x = x, .y = p1->y});
+  }
+
+  return E_SUCCESS;
+}
+
+static error_t _gfx_draw_line_vertical(gfx_context *ctx, const gfx_point *p1,
+                                       const gfx_point *p2) {
+  if (p1->x != p2->x) {
+    return E_VALUE_INVALID;
+  }
+
+  for (uint16_t y = p1->y; y <= p2->y; ++y) {
+    gfx_draw_gfx_pixel(ctx, &(gfx_point){.x = p1->x, .y = y});
+  }
+
+  return E_SUCCESS;
+}
+
+error_t gfx_draw_line(gfx_context *ctx, const gfx_point *p1,
+                      const gfx_point *p2) {
+  // Special case for horizontal / vertical lines
+  if (p1->y == p2->y) {
+    if (p1->x > p2->x) {
+      return _gfx_draw_line_horizontal(ctx, p2, p1);
+    } else {
+      return _gfx_draw_line_horizontal(ctx, p1, p2);
+    }
+  } else if (p1->x == p2->x) {
+    if (p1->y > p2->y) {
+      return _gfx_draw_line_vertical(ctx, p2, p1);
+    } else {
+      return _gfx_draw_line_vertical(ctx, p1, p2);
+    }
+  }
+
+  // Use Bresenham algorithm
+  if (abs(p2->y - p1->y) < abs(p2->x - p1->x)) {
+    if (p1->x > p2->x) {
+      _gfx_draw_line_low(ctx, p2, p1);
+    } else {
+      _gfx_draw_line_low(ctx, p1, p2);
+    }
+  } else {
+    if (p1->y > p2->y) {
+      _gfx_draw_line_high(ctx, p2, p1);
+    } else {
+      _gfx_draw_line_high(ctx, p1, p2);
+    }
+  }
+
   return E_SUCCESS;
 }
