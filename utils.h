@@ -83,6 +83,7 @@ int32_t fast_int_pow(int32_t base, uint32_t exponent);
   _Generic((x), int8_t                                                         \
            : fast_abs8, int16_t                                                \
            : fast_abs16, int32_t                                               \
+           : fast_abs32, int                                                   \
            : fast_abs32)(x)
 
 inline uint8_t fast_abs8(int8_t i) {

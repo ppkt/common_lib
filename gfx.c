@@ -66,19 +66,29 @@ error_t gfx_clear_pixel(gfx_context *ctx, uint16_t x, uint16_t y) {
   return E_SUCCESS;
 }
 
-error_t gfx_draw_gfx_pixel(gfx_context *ctx, const gfx_point *pt) {
-  check_error(gfx_draw_pixel(ctx, pt->x, pt->y));
+error_t gfx_draw_gfx_pixel(gfx_context *ctx, enum gfx_color color,
+                           const gfx_point *pt) {
+  if (color == COLOR_BG) {
+    check_error(gfx_clear_pixel(ctx, pt->x, pt->y));
+  } else {
+    check_error(gfx_draw_pixel(ctx, pt->x, pt->y));
+  }
   return E_SUCCESS;
 }
 
-error_t gfx_draw_char(gfx_context *ctx, uint16_t x, uint16_t y, char c) {
+error_t gfx_draw_char(gfx_context *ctx, enum gfx_color color, uint16_t x,
+                      uint16_t y, char c) {
 
   //  extern uint8_t font[];
   for (uint8_t i = 0; i < 5; i++) { // Char bitmap = 5 columns
     uint8_t line = font[c * 5 + i];
     for (uint8_t j = 0; j < 8; j++, line >>= 1u) {
       if (line & 1u) {
-        check_error(gfx_draw_pixel(ctx, x + i, y + j));
+        if (color == COLOR_BG) {
+          check_error(gfx_clear_pixel(ctx, x + i, y + j));
+        } else {
+          check_error(gfx_draw_pixel(ctx, x + i, y + j));
+        }
       }
     }
   }
@@ -86,8 +96,8 @@ error_t gfx_draw_char(gfx_context *ctx, uint16_t x, uint16_t y, char c) {
   return E_SUCCESS;
 }
 
-error_t gfx_draw_text(gfx_context *ctx, uint16_t x, uint16_t y,
-                      const char *string) {
+error_t gfx_draw_text(gfx_context *ctx, enum gfx_color color, uint16_t x,
+                      uint16_t y, const char *string) {
   uint16_t _x = x;
   uint16_t _y = y;
   uint8_t a = 0;
@@ -96,14 +106,14 @@ error_t gfx_draw_text(gfx_context *ctx, uint16_t x, uint16_t y,
       _x = 0;
       _y += 8;
     }
-    check_error(gfx_draw_char(ctx, _x, _y, string[a++]));
+    check_error(gfx_draw_char(ctx, color, _x, _y, string[a++]));
     _x += 5;
   }
   return E_SUCCESS;
 }
 
-static error_t _gfx_draw_line_low(gfx_context *ctx, const gfx_point *p1,
-                                  const gfx_point *p2) {
+static error_t _gfx_draw_line_low(gfx_context *ctx, enum gfx_color color,
+                                  const gfx_point *p1, const gfx_point *p2) {
   int16_t d_x = p2->x - p1->x;
   int16_t d_y = p2->y - p1->y;
   int8_t y_i = 1;
@@ -116,7 +126,7 @@ static error_t _gfx_draw_line_low(gfx_context *ctx, const gfx_point *p1,
   int16_t y = p1->y;
 
   for (uint16_t x = p1->x; x < p2->x; ++x) {
-    check_error(gfx_draw_gfx_pixel(ctx, &(gfx_point){.x = x, .y = y}));
+    check_error(gfx_draw_gfx_pixel(ctx, color, &(gfx_point){.x = x, .y = y}));
 
     if (d > 0) {
       y += y_i;
@@ -128,8 +138,8 @@ static error_t _gfx_draw_line_low(gfx_context *ctx, const gfx_point *p1,
   return E_SUCCESS;
 }
 
-static error_t _gfx_draw_line_high(gfx_context *ctx, const gfx_point *p1,
-                                   const gfx_point *p2) {
+static error_t _gfx_draw_line_high(gfx_context *ctx, enum gfx_color color,
+                                   const gfx_point *p1, const gfx_point *p2) {
   int16_t d_x = p2->x - p1->x;
   int16_t d_y = p2->y - p1->y;
   int8_t x_i = 1;
@@ -142,7 +152,7 @@ static error_t _gfx_draw_line_high(gfx_context *ctx, const gfx_point *p1,
   int16_t x = p1->x;
 
   for (uint16_t y = p1->y; y < p2->y; ++y) {
-    check_error(gfx_draw_gfx_pixel(ctx, &(gfx_point){.x = x, .y = y}));
+    check_error(gfx_draw_gfx_pixel(ctx, color, &(gfx_point){.x = x, .y = y}));
 
     if (d > 0) {
       x += x_i;
@@ -154,92 +164,96 @@ static error_t _gfx_draw_line_high(gfx_context *ctx, const gfx_point *p1,
   return E_SUCCESS;
 }
 
-static error_t _gfx_draw_line_horizontal(gfx_context *ctx, const gfx_point *p1,
+static error_t _gfx_draw_line_horizontal(gfx_context *ctx, enum gfx_color color,
+                                         const gfx_point *p1,
                                          const gfx_point *p2) {
   if (p1->y != p2->y) {
     return E_VALUE_INVALID;
   }
 
   for (uint16_t x = p1->x; x <= p2->x; ++x) {
-    check_error(gfx_draw_gfx_pixel(ctx, &(gfx_point){.x = x, .y = p1->y}));
+    check_error(
+        gfx_draw_gfx_pixel(ctx, color, &(gfx_point){.x = x, .y = p1->y}));
   }
 
   return E_SUCCESS;
 }
 
-static error_t _gfx_draw_line_vertical(gfx_context *ctx, const gfx_point *p1,
+static error_t _gfx_draw_line_vertical(gfx_context *ctx, enum gfx_color color,
+                                       const gfx_point *p1,
                                        const gfx_point *p2) {
   if (p1->x != p2->x) {
     return E_VALUE_INVALID;
   }
 
   for (uint16_t y = p1->y; y <= p2->y; ++y) {
-    check_error(gfx_draw_gfx_pixel(ctx, &(gfx_point){.x = p1->x, .y = y}));
+    check_error(
+        gfx_draw_gfx_pixel(ctx, color, &(gfx_point){.x = p1->x, .y = y}));
   }
 
   return E_SUCCESS;
 }
 
-error_t gfx_draw_line(gfx_context *ctx, const gfx_point *p1,
-                      const gfx_point *p2) {
+error_t gfx_draw_line(gfx_context *ctx, enum gfx_color color,
+                      const gfx_point *p1, const gfx_point *p2) {
 
   gfx_point _p1, _p2;
   check_error(_gfx_min_max_point(p1, p2, &_p1, &_p2));
 
   // Special case for horizontal / vertical lines
   if (_p1.y == _p2.y) {
-    return _gfx_draw_line_horizontal(ctx, &_p1, &_p2);
+    return _gfx_draw_line_horizontal(ctx, color, &_p1, &_p2);
   } else if (_p1.x == _p2.x) {
-    return _gfx_draw_line_vertical(ctx, &_p1, &_p2);
+    return _gfx_draw_line_vertical(ctx, color, &_p1, &_p2);
   }
 
   // Use Bresenham algorithm
-  if (abs(p2->y - p1->y) < abs(p2->x - p1->x)) {
+  if (fast_abs(p2->y - p1->y) < fast_abs(p2->x - p1->x)) {
     if (p1->x > p2->x) {
-      return _gfx_draw_line_low(ctx, p2, p1);
+      return _gfx_draw_line_low(ctx, color, p2, p1);
     } else {
-      return _gfx_draw_line_low(ctx, p1, p2);
+      return _gfx_draw_line_low(ctx, color, p1, p2);
     }
   } else {
     if (p1->y > p2->y) {
-      return _gfx_draw_line_high(ctx, p2, p1);
+      return _gfx_draw_line_high(ctx, color, p2, p1);
     } else {
-      return _gfx_draw_line_high(ctx, p1, p2);
+      return _gfx_draw_line_high(ctx, color, p1, p2);
     }
   }
 }
 
-error_t gfx_draw_rectangle(gfx_context *ctx, const gfx_point *p1,
-                           const gfx_point *p2) {
+error_t gfx_draw_rectangle(gfx_context *ctx, enum gfx_color color,
+                           const gfx_point *p1, const gfx_point *p2) {
   gfx_point _p1, _p2;
   check_error(_gfx_min_max_point(p1, p2, &_p1, &_p2));
 
   gfx_point corner_1 = {.x = _p2.x, .y = _p1.y};
   gfx_point corner_2 = {.x = _p1.x, .y = _p2.y};
 
-  check_error(_gfx_draw_line_horizontal(ctx, &_p1, &corner_1));
-  check_error(_gfx_draw_line_horizontal(ctx, &corner_2, &_p2));
+  check_error(_gfx_draw_line_horizontal(ctx, color, &_p1, &corner_1));
+  check_error(_gfx_draw_line_horizontal(ctx, color, &corner_2, &_p2));
 
-  check_error(_gfx_draw_line_vertical(ctx, &_p1, &corner_2));
-  check_error(_gfx_draw_line_vertical(ctx, &corner_1, &_p2));
+  check_error(_gfx_draw_line_vertical(ctx, color, &_p1, &corner_2));
+  check_error(_gfx_draw_line_vertical(ctx, color, &corner_1, &_p2));
 
   return E_SUCCESS;
 }
-error_t gfx_draw_circle(gfx_context *ctx, const gfx_point *center,
-                        uint16_t radius) {
+error_t gfx_draw_circle(gfx_context *ctx, enum gfx_color color,
+                        const gfx_point *center, uint16_t radius) {
   int16_t f = 1 - radius;
   int16_t d_x = 0;
   int16_t d_y = -2 * radius;
   int16_t x = 0;
   int16_t y = radius;
 
-  gfx_draw_gfx_pixel(ctx,
+  gfx_draw_gfx_pixel(ctx, color,
                      &(gfx_point){.x = center->x, .y = center->y + radius});
-  gfx_draw_gfx_pixel(ctx,
+  gfx_draw_gfx_pixel(ctx, color,
                      &(gfx_point){.x = center->x, .y = center->y - radius});
-  gfx_draw_gfx_pixel(ctx,
+  gfx_draw_gfx_pixel(ctx, color,
                      &(gfx_point){.x = center->x + radius, .y = center->y});
-  gfx_draw_gfx_pixel(ctx,
+  gfx_draw_gfx_pixel(ctx, color,
                      &(gfx_point){.x = center->x - radius, .y = center->y});
 
   while (x < y) {
@@ -253,34 +267,35 @@ error_t gfx_draw_circle(gfx_context *ctx, const gfx_point *center,
     f += d_x + 1;
 
     check_error(gfx_draw_gfx_pixel(
-        ctx, &(gfx_point){.x = center->x + x, .y = center->y + y}));
+        ctx, color, &(gfx_point){.x = center->x + x, .y = center->y + y}));
     check_error(gfx_draw_gfx_pixel(
-        ctx, &(gfx_point){.x = center->x - x, .y = center->y + y}));
+        ctx, color, &(gfx_point){.x = center->x - x, .y = center->y + y}));
     check_error(gfx_draw_gfx_pixel(
-        ctx, &(gfx_point){.x = center->x + x, .y = center->y - y}));
+        ctx, color, &(gfx_point){.x = center->x + x, .y = center->y - y}));
     check_error(gfx_draw_gfx_pixel(
-        ctx, &(gfx_point){.x = center->x - x, .y = center->y - y}));
+        ctx, color, &(gfx_point){.x = center->x - x, .y = center->y - y}));
 
     check_error(gfx_draw_gfx_pixel(
-        ctx, &(gfx_point){.x = center->x + y, .y = center->y + x}));
+        ctx, color, &(gfx_point){.x = center->x + y, .y = center->y + x}));
     check_error(gfx_draw_gfx_pixel(
-        ctx, &(gfx_point){.x = center->x - y, .y = center->y + x}));
+        ctx, color, &(gfx_point){.x = center->x - y, .y = center->y + x}));
     check_error(gfx_draw_gfx_pixel(
-        ctx, &(gfx_point){.x = center->x + y, .y = center->y - x}));
+        ctx, color, &(gfx_point){.x = center->x + y, .y = center->y - x}));
     check_error(gfx_draw_gfx_pixel(
-        ctx, &(gfx_point){.x = center->x - y, .y = center->y - x}));
+        ctx, color, &(gfx_point){.x = center->x - y, .y = center->y - x}));
   }
 
   return E_SUCCESS;
 }
 
-error_t gfx_fill_rectangle(gfx_context *ctx, const gfx_point *p1,
-                           const gfx_point *p2) {
+error_t gfx_fill_rectangle(gfx_context *ctx, enum gfx_color color,
+                           const gfx_point *p1, const gfx_point *p2) {
   gfx_point _p1, _p2;
   check_error(_gfx_min_max_point(p1, p2, &_p1, &_p2));
 
   for (uint16_t y = _p1.y; y <= _p2.y; ++y) {
-    check_error(_gfx_draw_line_horizontal(ctx, &(gfx_point){.x = _p1.x, .y = y},
+    check_error(_gfx_draw_line_horizontal(ctx, color,
+                                          &(gfx_point){.x = _p1.x, .y = y},
                                           &(gfx_point){.x = _p2.x, .y = y}));
   }
 
