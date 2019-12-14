@@ -198,3 +198,39 @@ void delay_us(uint32_t timer, uint16_t delay) {
   while (TIM_CR1(timer) & TIM_CR1_CEN)
     ;
 }
+
+// Initialize structure used for debouncing
+error_t debounce_init(debounce *config, const pin *_pin, uint16_t threshold) {
+  if (!config || !_pin) {
+    return E_NULL_PTR;
+  }
+
+  config->cnt = 0;
+  config->pin = *_pin;
+  config->state = 0;
+  config->threshold = threshold;
+
+  return E_SUCCESS;
+}
+
+// When this function is called, value from pin is read and, if threshold is
+// reached, state of structure is updated.
+error_t debounce_get_state(debounce *config) {
+  if (!config) {
+    return E_NULL_PTR;
+  }
+
+  bool new_state = gpio_get(config->pin.port, config->pin.gpio);
+  if (new_state != config->state) {
+    config->cnt++;
+
+    if (config->cnt > config->threshold) {
+      config->state = new_state;
+      config->cnt = 0;
+    }
+  } else {
+    config->cnt = 0;
+  }
+
+  return E_SUCCESS;
+}

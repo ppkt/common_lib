@@ -27,6 +27,17 @@ typedef struct {
   uint16_t gpio;
 } pin;
 
+typedef struct {
+  // pin to monitor
+  pin pin;
+  // internal counter
+  uint16_t cnt;
+  // threshold - when `cnt` will reach this value, new state will be updated
+  uint16_t threshold;
+  // current state
+  bool state;
+} debounce;
+
 typedef enum {
   E_SUCCESS = 0,
   // returned when a pointer was expected but it was empty
@@ -58,6 +69,9 @@ void led_set(bool new_state);
 
 void setup_delay_timer(uint32_t timer);
 void delay_us(uint32_t timer, uint16_t us);
+
+error_t debounce_init(debounce *config, const pin *pin, uint16_t threshold);
+error_t debounce_get_state(debounce *config);
 
 uint8_t sadd8(uint8_t a, uint8_t b);
 uint16_t sadd16(uint16_t a, uint16_t b);
