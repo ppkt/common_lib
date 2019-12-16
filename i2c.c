@@ -32,7 +32,7 @@ void i2c1_init(enum i2c_speeds speed) {
   }
 
   // APB1 is running at 36MHz.
-  i2c_set_speed(I2C1, speed, I2C_CR2_FREQ_36MHZ);
+  i2c_set_speed(I2C1, speed, rcc_apb1_frequency / 1e6);
   i2c_peripheral_enable(I2C1);
 }
 
