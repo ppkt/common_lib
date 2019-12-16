@@ -208,6 +208,7 @@ error_t debounce_init(debounce *config, const pin *_pin, uint16_t threshold) {
   config->cnt = 0;
   config->pin = *_pin;
   config->state = 0;
+  config->known_state = 0;
   config->threshold = threshold;
 
   return E_SUCCESS;

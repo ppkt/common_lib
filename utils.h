@@ -36,6 +36,9 @@ typedef struct {
   uint16_t threshold;
   // current state
   bool state;
+  // last known state - this value is set by external app, debounce functions
+  // won't touch it
+  bool known_state;
 } debounce;
 
 typedef enum {
