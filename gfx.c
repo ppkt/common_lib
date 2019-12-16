@@ -1,21 +1,18 @@
 #include "gfx.h"
 #include "fonts/adafruit_gfx_library/glcdfont.c"
 
-static error_t _gfx_min_max_point(const gfx_point *p1, const gfx_point *p2,
-                                  gfx_point *out_1, gfx_point *out_2) {
-  if (!out_1 || !out_2) {
+// Helper function to create "sorted" points, out_p1 will have the smallest x
+// and y coordinates from p1 and p2 and out_p2 the biggest. Useful for, e.g.
+// drawing rectangles
+error_t gfx_min_max_point(const gfx_point *p1, const gfx_point *p2,
+                                  gfx_point *out_p1, gfx_point *out_p2) {
+  if (!p1 || !p2 || !out_p1 || !out_p2) {
     return E_NULL_PTR;
   }
-
-  uint16_t min_x = min(p1->x, p2->x);
-  uint16_t max_x = max(p1->x, p2->x);
-  uint16_t min_y = min(p1->y, p2->y);
-  uint16_t max_y = max(p1->y, p2->y);
-
-  out_1->x = min_x;
-  out_1->y = min_y;
-  out_2->x = max_x;
-  out_2->y = max_y;
+  out_p1->x = min(p1->x, p2->x);
+  out_p1->y = min(p1->y, p2->y);
+  out_p2->x = max(p1->x, p2->x);
+  out_p2->y = max(p1->y, p2->y);;
   return E_SUCCESS;
 }
 
@@ -198,7 +195,7 @@ error_t gfx_draw_line(gfx_context *ctx, enum gfx_color color,
                       const gfx_point *p1, const gfx_point *p2) {
 
   gfx_point _p1, _p2;
-  check_error(_gfx_min_max_point(p1, p2, &_p1, &_p2));
+  check_error(gfx_min_max_point(p1, p2, &_p1, &_p2));
 
   // Special case for horizontal / vertical lines
   if (_p1.y == _p2.y) {
@@ -226,7 +223,7 @@ error_t gfx_draw_line(gfx_context *ctx, enum gfx_color color,
 error_t gfx_draw_rectangle(gfx_context *ctx, enum gfx_color color,
                            const gfx_point *p1, const gfx_point *p2) {
   gfx_point _p1, _p2;
-  check_error(_gfx_min_max_point(p1, p2, &_p1, &_p2));
+  check_error(gfx_min_max_point(p1, p2, &_p1, &_p2));
 
   gfx_point corner_1 = {.x = _p2.x, .y = _p1.y};
   gfx_point corner_2 = {.x = _p1.x, .y = _p2.y};
@@ -291,7 +288,7 @@ error_t gfx_draw_circle(gfx_context *ctx, enum gfx_color color,
 error_t gfx_fill_rectangle(gfx_context *ctx, enum gfx_color color,
                            const gfx_point *p1, const gfx_point *p2) {
   gfx_point _p1, _p2;
-  check_error(_gfx_min_max_point(p1, p2, &_p1, &_p2));
+  check_error(gfx_min_max_point(p1, p2, &_p1, &_p2));
 
   for (uint16_t y = _p1.y; y <= _p2.y; ++y) {
     check_error(_gfx_draw_line_horizontal(ctx, color,

@@ -23,6 +23,9 @@ enum gfx_color {
 error_t gfx_init(gfx_context *ctx, uint8_t *buffer, uint16_t width,
                  uint16_t height);
 
+error_t gfx_min_max_point(const gfx_point *p1, const gfx_point *p2,
+                          gfx_point *out_p1, gfx_point *out_p2);
+
 error_t gfx_demo_checker(gfx_context *ctx);
 
 error_t gfx_clear(gfx_context *ctx);
