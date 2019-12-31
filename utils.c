@@ -199,6 +199,13 @@ void delay_us(uint32_t timer, uint16_t delay) {
     ;
 }
 
+void trace_init(void) {
+  // enable the use DWT
+  if (!dwt_enable_cycle_counter()) {
+    hacf();
+  }
+}
+
 // Initialize structure used for debouncing
 error_t debounce_init(debounce *config, const pin *_pin, uint16_t threshold) {
   if (!config || !_pin) {

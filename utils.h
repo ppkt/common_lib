@@ -1,6 +1,7 @@
 #pragma once
 #include <stdlib.h>
 
+#include <libopencm3/cm3/dwt.h>
 #include <libopencm3/cm3/nvic.h>
 #include <libopencm3/cm3/systick.h>
 #include <libopencm3/stm32/gpio.h>
@@ -73,6 +74,10 @@ void led_set(bool new_state);
 void setup_delay_timer(uint32_t timer);
 void delay_us(uint32_t timer, uint16_t us);
 
+void trace_init(void);
+#define trace_start() (DWT_CYCCNT = 0)
+#define trace_stop() (DWT_CYCCNT)
+
 error_t debounce_init(debounce *config, const pin *pin, uint16_t threshold);
 error_t debounce_get_state(debounce *config);
 
@@ -121,8 +126,19 @@ inline uint32_t fast_abs32(int32_t i) {
   return (uint32_t)i;
 }
 
-#define check_error(e) if (e != E_SUCCESS) return e
-#define halt_on_error(e) if (e != E_SUCCESS) hacf()
+#define check_error(e)                                                         \
+  do {                                                                         \
+    if (e != E_SUCCESS) {                                                      \
+      return e;                                                                \
+    }                                                                          \
+  } while (0)
+
+#define halt_on_error(e)                                                       \
+  do {                                                                         \
+    if (e != E_SUCCESS) {                                                      \
+      hacf();                                                                  \
+    }                                                                          \
+  } while (0)
 
 #define max(a, b)                                                              \
   ({                                                                           \
