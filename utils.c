@@ -145,6 +145,8 @@ void delay_ms(uint32_t time) {
     ;
 }
 
+inline uint32_t get_system_millis(void) { return system_millis; }
+
 // For quick calculation of power when base and exponent are integers
 // https://stackoverflow.com/a/101613
 int32_t fast_int_pow(int32_t base, uint32_t exponent) {

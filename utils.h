@@ -66,6 +66,7 @@ typedef enum {
 void hacf(void) __attribute__((__noreturn__));
 // void rtc_setup(void);
 void systick_setup(uint8_t precision);
+uint32_t get_system_millis(void);
 void delay_ms(uint32_t time);
 void led_init(void);
 void led_toggle(void);
