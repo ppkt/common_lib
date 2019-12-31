@@ -61,10 +61,14 @@ void spi_init(uint32_t spi) {
 
 void spi_send_recv(uint32_t spi, const uint8_t *tx, uint8_t *rx, uint8_t size) {
   for (uint8_t i = 0; i < size; ++i) {
-    spi_send(spi, tx[i]);
-    SPI_WAIT_FOR_TX_EMPTY(spi);
-    SPI_WAIT_FOR_RX_NOT_EMPTY(spi);
-    SPI_WAIT_FOR_BUSY_CLEAR(spi);
-    rx[i] = spi_read(spi);
+    rx[i] = spi_xfer(spi, tx[i]);
   }
+}
+
+inline void spi_cs_deselect(const spi_device *dev) {
+  gpio_set(dev->nss.port, dev->nss.gpio);
+}
+
+inline void spi_cs_select(const spi_device *dev) {
+  gpio_clear(dev->nss.port, dev->nss.gpio);
 }

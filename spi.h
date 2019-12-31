@@ -35,3 +35,7 @@ void spi_init(uint32_t spi);
  * function (and pulling it up afterwards).
  */
 void spi_send_recv(uint32_t spi, const uint8_t *tx, uint8_t *rx, uint8_t size);
+
+void spi_cs_select(const spi_device *dev);
+
+void spi_cs_deselect(const spi_device *dev);
