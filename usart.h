@@ -20,12 +20,6 @@ void usart_printf(uint32_t usart, const char *format, ...);
 
 #define usart1_print(string) usart_print(USART1, string)
 #define usart1_printf(format, ...) usart_printf(USART1, format, __VA_ARGS__)
-#define print_variable_int(variable)                                           \
-  usart_printf(USART1, "%s = %d\r\n", #variable, variable)
-#define print_variable_hex(variable)                                           \
-  usart_printf(USART1, "%s = 0x%.2x\r\n", #variable, variable)
-#define print_variable_float(variable, precision)                              \
-  usart_printf(USART1, "%s = %.*f\r\n", #variable, precision, variable)
 
 #define __fmt__ "%-5s:%-3d%10s(): "
 #define __FILENAME__ strrchr("/" __FILE__, '/') + 1
@@ -54,3 +48,10 @@ void usart_printf(uint32_t usart, const char *format, ...);
       usart1_printf("[%s]\r\nCompiled: %s %s\r\n", app_name, __DATE__,         \
                     __TIME__);                                                 \
   } while (0)
+
+#define print_variable_int(variable)                                           \
+  debug_printf("%s = %d\r\n", #variable, variable)
+#define print_variable_hex(variable)                                           \
+  debug_printf("%s = 0x%.2x\r\n", #variable, variable)
+#define print_variable_float(variable, precision)                              \
+  debug_printf("%s = %.*f\r\n", #variable, precision, variable)

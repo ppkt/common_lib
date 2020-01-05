@@ -54,7 +54,7 @@ void usart_print(uint32_t usart, const char *string) {
 }
 void usart_printf(uint32_t usart, const char *format, ...) {
   va_list args;
-  static char buffer[120];
+  static char buffer[512];
   va_start(args, format);
   vsnprintf(buffer, sizeof(buffer), format, args);
   va_end(args);
