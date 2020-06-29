@@ -1,7 +1,7 @@
 #pragma once
-#include <common_lib/spi.h>
-#include <common_lib/utils.h>
-#include <common_lib/usart.h>
+#include "common_lib/spi.h"
+#include "common_lib/usart.h"
+#include "common_lib/utils.h"
 
 /* MMC/SD command */
 #define CMD0 (0)           /* GO_IDLE_STATE */

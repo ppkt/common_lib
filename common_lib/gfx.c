@@ -1,5 +1,9 @@
 #include "gfx.h"
+#ifdef GFX
 #include "fonts/adafruit_gfx_library/glcdfont.c"
+#else
+extern uint8_t *font;
+#endif
 
 // Helper function to create "sorted" points, out_p1 will have the smallest x
 // and y coordinates from p1 and p2 and out_p2 the biggest. Useful for, e.g.

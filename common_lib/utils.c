@@ -59,6 +59,16 @@
 //}
 
 
+#ifndef LED_PORT
+#warning "LED port not defined, using default value"
+#define LED_PORT GPIOA
+#endif
+
+#ifndef LED_PIN
+#warning "LED pin not defined, using default value"
+#define LED_PIN GPIO1
+#endif
+
 void led_init(void) {
 
   // Enable GPIO clock
@@ -243,4 +253,13 @@ error_t debounce_get_state(debounce *config) {
   }
 
   return E_SUCCESS;
+}
+
+uint32_t heap_size(void) {
+  char stack_variable;
+  char *heap_variable;
+  heap_variable = malloc(4);
+  uint32_t result = &stack_variable - heap_variable;
+  free(heap_variable);
+  return result;
 }

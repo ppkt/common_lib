@@ -9,6 +9,10 @@
 
 #include "utils.h"
 
+#ifndef DEBUG
+#define DEBUG 0
+#endif
+
 void usart1_init(uint32_t speed);
 
 #ifdef STM32F1

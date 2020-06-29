@@ -52,6 +52,10 @@ typedef enum {
   E_I2C_TIMEOUT,
   // returned when value is too big
   E_VALUE_TOO_BIG,
+  // device not found,
+  E_NOT_FOUND,
+  // timeout
+  E_TIMEOUT,
   // other error, unspecified
   E_UNSPECIFIED = 255,
 } error_t;
@@ -74,6 +78,8 @@ void led_set(bool new_state);
 
 void setup_delay_timer(uint32_t timer);
 void delay_us(uint32_t timer, uint16_t us);
+
+uint32_t heap_size(void);
 
 void trace_init(void);
 #define trace_start() (DWT_CYCCNT = 0)
@@ -154,3 +160,24 @@ inline uint32_t fast_abs32(int32_t i) {
     __typeof__(b) _b = (b);                                                    \
     _a < _b ? _a : _b;                                                         \
   })
+
+static inline uint32_t port_to_rcc(uint32_t port) {
+  switch (port) {
+  case GPIOA:
+    return RCC_GPIOA;
+  case GPIOB:
+    return RCC_GPIOB;
+  case GPIOC:
+    return RCC_GPIOC;
+  case GPIOD:
+    return RCC_GPIOD;
+  case GPIOE:
+    return RCC_GPIOE;
+  case GPIOF:
+    return RCC_GPIOF;
+  case GPIOG:
+    return RCC_GPIOG;
+  default:
+    hacf();
+  }
+}

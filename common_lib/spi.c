@@ -52,8 +52,9 @@ void spi_init(uint32_t spi) {
   spi_fifo_reception_threshold_8bit(SPI1);
 #elif STM32F1
   spi_init_master(
-      spi, SPI_CR1_BAUDRATE_FPCLK_DIV_64, SPI_CR1_CPOL_CLK_TO_0_WHEN_IDLE,
+      spi, SPI_CR1_BAUDRATE_FPCLK_DIV_2, SPI_CR1_CPOL_CLK_TO_0_WHEN_IDLE,
       SPI_CR1_CPHA_CLK_TRANSITION_1, SPI_CR1_DFF_8BIT, SPI_CR1_MSBFIRST);
+  spi_set_standard_mode(spi, 0);
 #endif
 
   spi_enable(spi);
@@ -66,6 +67,8 @@ void spi_send_recv(uint32_t spi, const uint8_t *tx, uint8_t *rx, uint8_t size) {
 }
 
 inline void spi_cs_deselect(const spi_device *dev) {
+  SPI_WAIT_FOR_TX_EMPTY(dev->spi);
+  SPI_WAIT_FOR_BUSY_CLEAR(dev->spi);
   gpio_set(dev->nss.port, dev->nss.gpio);
 }
 

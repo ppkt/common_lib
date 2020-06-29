@@ -1,0 +1,9 @@
+{
+  "name": "common_lib",
+  "version": "1.0.0",
+  "frameworks": "libopencm3",
+  "build": {
+    "includeDir": ".",
+    "srcDir": "."
+  }
+}
