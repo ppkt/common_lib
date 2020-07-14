@@ -36,13 +36,13 @@ void usart_printf(uint32_t usart, const char *format, ...);
 #define debug_print(string)                                                    \
   do {                                                                         \
     if (DEBUG)                                                                 \
-      usart1_printf(__fmt__ "%s", __FILENAME__, __LINE__, __FUNCTION__,        \
+      usart1_printf(__fmt__ "%s\r\n", __FILENAME__, __LINE__, __FUNCTION__,    \
                     string);                                                   \
   } while (0)
 #define debug_printf(fmt, ...)                                                 \
   do {                                                                         \
     if (DEBUG)                                                                 \
-      usart1_printf(__fmt__ fmt, __FILENAME__, __LINE__, __FUNCTION__,         \
+      usart1_printf(__fmt__ fmt "\r\n", __FILENAME__, __LINE__, __FUNCTION__,  \
                     __VA_ARGS__);                                              \
   } while (0)
 
@@ -54,8 +54,8 @@ void usart_printf(uint32_t usart, const char *format, ...);
   } while (0)
 
 #define print_variable_int(variable)                                           \
-  debug_printf("%s = %d\r\n", #variable, variable)
+  debug_printf("%s = %d", #variable, variable)
 #define print_variable_hex(variable)                                           \
-  debug_printf("%s = 0x%.2x\r\n", #variable, variable)
+  debug_printf("%s = 0x%.2x", #variable, variable)
 #define print_variable_float(variable, precision)                              \
-  debug_printf("%s = %.*f\r\n", #variable, precision, variable)
+  debug_printf("%s = %.*f", #variable, precision, variable)
