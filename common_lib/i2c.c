@@ -9,31 +9,60 @@
 error_t i2c_wait_for_start(uint32_t i2c);
 error_t i2c_wait_for_address(uint32_t i2c);
 
-void i2c1_init(enum i2c_speeds speed) {
+void i2c_init(uint32_t i2c, enum i2c_speeds speed) {
+  // Get I2C clock, pins and ports
+  enum rcc_periph_clken i2c_clock;
+  uint32_t scl_port, sda_port;
+  uint16_t scl_pin, sda_pin;
+
+  switch (i2c) {
+  case I2C1:
+    i2c_clock = RCC_I2C1;
+    scl_port = GPIO_BANK_I2C1_SCL;
+    scl_pin = GPIO_I2C1_SCL;
+    sda_port = GPIO_BANK_I2C1_SDA;
+    sda_pin = GPIO_I2C1_SDA;
+    break;
+  case I2C2:
+    i2c_clock = RCC_I2C2;
+    scl_port = GPIO_BANK_I2C2_SCL;
+    scl_pin = GPIO_I2C2_SCL;
+    sda_port = GPIO_BANK_I2C2_SDA;
+    sda_pin = GPIO_I2C2_SDA;
+    break;
+  default:
+    hacf();
+  }
+
   // Enable I2C clock
-  rcc_periph_clock_enable(RCC_I2C1);
+  rcc_periph_clock_enable(i2c_clock);
 
-  // Enable GPIO clock
-  rcc_periph_clock_enable(RCC_GPIOB);
+  // Enable GPIO clocks
+  rcc_periph_clock_enable(gpio2rcc(scl_port));
+  rcc_periph_clock_enable(gpio2rcc(sda_port));
 
-  // Use PB6 and PB7
-  gpio_set_mode(GPIO_BANK_I2C1_SCL | GPIO_BANK_I2C1_SDA,
-                GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_OPENDRAIN,
-                GPIO_I2C1_SCL | GPIO_I2C1_SDA);
+  // Set GPIO mode
+  gpio_set_mode(scl_port | sda_port, GPIO_MODE_OUTPUT_50_MHZ,
+                GPIO_CNF_OUTPUT_ALTFN_OPENDRAIN, scl_pin | sda_pin);
 
   // Shut down peripheral for configuration
-  i2c_reset(I2C1);
-  i2c_peripheral_disable(I2C1);
+  i2c_reset(i2c);
+  i2c_peripheral_disable(i2c);
 
+  // Set speed
   if (speed == i2c_speed_sm_100k) {
-    i2c_set_standard_mode(I2C1);
+    i2c_set_standard_mode(i2c);
   } else {
-    i2c_set_fast_mode(I2C1);
+    i2c_set_fast_mode(i2c);
   }
 
   // APB1 is running at 36MHz.
-  i2c_set_speed(I2C1, speed, rcc_apb1_frequency / 1e6);
-  i2c_peripheral_enable(I2C1);
+  i2c_set_speed(i2c, speed, rcc_apb1_frequency / 1e6);
+  i2c_peripheral_enable(i2c);
+}
+
+void i2c1_init(enum i2c_speeds speed) {
+    i2c_init(I2C1, speed);
 }
 
 error_t i2c_wait_for_address(uint32_t i2c) {
