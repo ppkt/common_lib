@@ -1,6 +1,6 @@
 #include "utils.h"
 
-//void rtc_setup(void) {
+// void rtc_setup(void) {
 //    // Based on http://www.stm32.eu/node/97 and AN2821
 //
 //    // Enable PWR and BKP clocks
@@ -14,9 +14,11 @@
 //    // Enable LSE
 //    RCC_LSEConfig(RCC_LSE_ON);  // RCC_LSICmd(ENABLE);
 //    // Wait for LSE
-//    while (RCC_GetFlagStatus(RCC_FLAG_LSERDY) == RESET) {}  // while(RCC_GetFlagStatus(RCC_FLAG_LSIRDY) == RESET) {}
+//    while (RCC_GetFlagStatus(RCC_FLAG_LSERDY) == RESET) {}  //
+//    while(RCC_GetFlagStatus(RCC_FLAG_LSIRDY) == RESET) {}
 //    // RTCCLK = LSE = 32.768 kHz
-//    RCC_RTCCLKConfig(RCC_RTCCLKSource_LSE);  // RCC_RTCCLKConfig(RCC_RTCCLKSource_LSI);
+//    RCC_RTCCLKConfig(RCC_RTCCLKSource_LSE);  //
+//    RCC_RTCCLKConfig(RCC_RTCCLKSource_LSI);
 //    // Turn on RTC clock
 //    RCC_RTCCLKCmd(ENABLE);
 //    // Wait for synchronization
@@ -57,7 +59,6 @@
 //    RTC_ITConfig(RTC_IT_SEC, ENABLE);
 //    RTC_WaitForLastTask();
 //}
-
 
 #ifndef LED_PORT
 #warning "LED port not defined, using default value"
@@ -262,4 +263,26 @@ uint32_t heap_size(void) {
   uint32_t result = &stack_variable - heap_variable;
   free(heap_variable);
   return result;
+}
+
+// Return RCC clock associated with GPIO port
+enum rcc_periph_clken gpio2rcc(uint32_t gpio) {
+  switch (gpio) {
+  case GPIOA:
+    return RCC_GPIOA;
+  case GPIOB:
+    return RCC_GPIOB;
+  case GPIOC:
+    return RCC_GPIOC;
+  case GPIOD:
+    return RCC_GPIOD;
+  case GPIOE:
+    return RCC_GPIOE;
+  case GPIOF:
+    return RCC_GPIOF;
+  case GPIOG:
+    return RCC_GPIOG;
+  default:
+    hacf();
+  }
 }

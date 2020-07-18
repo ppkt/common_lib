@@ -79,6 +79,8 @@ void led_set(bool new_state);
 void setup_delay_timer(uint32_t timer);
 void delay_us(uint32_t timer, uint16_t us);
 
+enum rcc_periph_clken gpio2rcc(uint32_t gpio);
+
 uint32_t heap_size(void);
 
 void trace_init(void);
