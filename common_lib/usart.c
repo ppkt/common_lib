@@ -1,49 +1,61 @@
 #include "usart.h"
 
+void usart_init(uint32_t usart, uint32_t speed, uint32_t mode) {
+  // Get I2C clock, pins and ports
+  enum rcc_periph_clken usart_clock;
+  uint32_t tx_port, rx_port;
+  uint16_t tx_pin, rx_pin;
+
+  switch (usart) {
+  case USART1:
+    usart_clock = RCC_USART1;
+    tx_port = GPIO_BANK_USART1_TX;
+    tx_pin = GPIO_USART1_TX;
+    rx_port = GPIO_BANK_USART1_RX;
+    rx_pin = GPIO_USART1_RX;
+    break;
+  case USART2:
+    usart_clock = RCC_USART2;
+    tx_port = GPIO_BANK_USART2_TX;
+    tx_pin = GPIO_USART2_TX;
+    rx_port = GPIO_BANK_USART2_RX;
+    rx_pin = GPIO_USART2_RX;
+    break;
+  case USART3:
+    usart_clock = RCC_USART3;
+    tx_port = GPIO_BANK_USART3_TX;
+    tx_pin = GPIO_USART3_TX;
+    rx_port = GPIO_BANK_USART3_RX;
+    rx_pin = GPIO_USART3_RX;
+    break;
+  default:
+    hacf();
+  }
+  // Enable UART clock
+  rcc_periph_clock_enable(usart_clock);
+
+  // Enable GPIO clocks
+  rcc_periph_clock_enable(gpio2rcc(tx_port));
+  rcc_periph_clock_enable(gpio2rcc(rx_port));
+
+  // Set GPIO mode
+  gpio_set_mode(tx_port, GPIO_MODE_OUTPUT_50_MHZ,
+                GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, tx_pin);
+  gpio_set_mode(rx_port, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_INPUT_FLOAT, rx_pin);
+
+  usart_disable(usart);
+  usart_set_baudrate(usart, speed);
+  usart_set_mode(usart, mode);
+  usart_enable(usart);
+}
+
 void usart1_init(uint32_t speed) {
-  // Enable GPIO clock
-  rcc_periph_clock_enable(RCC_GPIOA);
-
-  // Enable UART clock
-  rcc_periph_clock_enable(RCC_USART1);
-
-  // Use PA9 and PA10
-#ifdef STM32F1
-    gpio_set_mode(GPIO_BANK_USART1_TX, GPIO_MODE_OUTPUT_50_MHZ,
-                  GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, GPIO_USART1_TX);
-    gpio_set_mode(GPIO_BANK_USART1_RX, GPIO_MODE_OUTPUT_50_MHZ,
-                  GPIO_CNF_INPUT_FLOAT, GPIO_USART1_RX);
-#elif STM32F0
-    gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO9);
-
-    // setup USART1 TX pin as alternate function.
-    gpio_set_af(GPIOA, GPIO_AF1, GPIO9);
-#endif
-
-    usart_set_baudrate(USART1, speed);
-    usart_set_mode(USART1, USART_MODE_TX);
-    usart_enable(USART1);
+  usart_init(USART1, speed, USART_MODE_TX);
 }
 
-#ifdef STM32F1
 void usart2_init(uint32_t speed) {
-  // Enable GPIO clock
-  rcc_periph_clock_enable(RCC_GPIOA);
-
-  // Enable UART clock
-  rcc_periph_clock_enable(RCC_USART2);
-
-  // Use PA2 and PA3
-  gpio_set_mode(GPIO_BANK_USART2_TX, GPIO_MODE_OUTPUT_50_MHZ,
-                GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, GPIO_USART2_TX);
-  gpio_set_mode(GPIO_BANK_USART2_RX, GPIO_MODE_OUTPUT_50_MHZ,
-                GPIO_CNF_INPUT_FLOAT, GPIO_USART2_RX);
-
-  usart_set_baudrate(USART2, speed);
-  usart_set_mode(USART2, USART_MODE_TX);
-  usart_enable(USART2);
+  usart_init(USART2, speed, USART_MODE_TX);
 }
-#endif
 
 #ifndef DISABLE_UART
 void usart_print(uint32_t usart, const char *string) {

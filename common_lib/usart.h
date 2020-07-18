@@ -13,11 +13,9 @@
 #define DEBUG 0
 #endif
 
+void usart_init(uint32_t usart, uint32_t speed, uint32_t mode);
 void usart1_init(uint32_t speed);
-
-#ifdef STM32F1
 void usart2_init(uint32_t speed);
-#endif
 
 void usart_print(uint32_t usart, const char *string);
 void usart_printf(uint32_t usart, const char *format, ...);
