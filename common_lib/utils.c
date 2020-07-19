@@ -191,6 +191,9 @@ void setup_delay_timer(uint32_t timer) {
   case TIM3:
     rcc_tim = RCC_TIM3;
     break;
+  case TIM4:
+    rcc_tim = RCC_TIM4;
+    break;
   default:
     hacf();
     return;
